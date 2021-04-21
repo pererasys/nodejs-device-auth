@@ -10,7 +10,7 @@ export const buildApp = () => {
   const app = express();
 
   app.get("/health", async (req, res) => {
-    const count = await User.count();
+    const count = await User.countDocuments();
 
     return res.status(200).send({ count });
   });
