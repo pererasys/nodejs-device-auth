@@ -6,8 +6,8 @@ const app = buildApp();
 
 beforeAll(() => {});
 
-test("should have 200 status", async () => {
-  const res = await request(app).get("/");
+test("should have healthy 200 status", async () => {
+  const res = await request(app).get("/health");
 
   expect(res.statusCode).toEqual(200);
 });
