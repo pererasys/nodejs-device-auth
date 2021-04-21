@@ -5,7 +5,7 @@
 
 import { Model } from "mongoose";
 
-import User, { IUserDocument, IUserInput } from "../models/user";
+import User, { IUserDocument } from "../models/user";
 import { ServiceError } from "./utils";
 
 export class UserService {
