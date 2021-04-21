@@ -6,7 +6,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uid } from "rand-token";
-import { Model, Error as MongooseError, NativeError } from "mongoose";
+import { Model } from "mongoose";
 
 import User, { IUserDocument, IUserInput } from "../models/user";
 import Device, { IDeviceDocument, IDeviceInput } from "../models/device";
