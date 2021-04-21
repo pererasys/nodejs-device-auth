@@ -27,15 +27,15 @@ export interface IDeviceModel extends Model<IDeviceDocument> {}
 
 const DeviceSchema = new Schema(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     identifier: {
       type: String,
       required: true,
       index: true,
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     address: {
       type: String,

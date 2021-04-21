@@ -15,6 +15,10 @@ export class UserService {
     this.model = User;
   }
 
+  /**
+   * Returns the user with the given ID
+   * @param {string} id
+   */
   async getByID(id: string) {
     try {
       const user = this.model.findById(id);

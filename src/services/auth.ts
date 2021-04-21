@@ -155,7 +155,7 @@ export class AuthService {
       identifier: device.identifier,
     });
 
-    if (!registeredDevice) registeredDevice = new this.deviceModel();
+    if (!registeredDevice) registeredDevice = new this.deviceModel(device);
 
     registeredDevice.platform = device.platform;
     registeredDevice.address = device.address;
