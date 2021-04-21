@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_DATABASE=nodejs-device-auth
+      - MONGO_INITDB_ROOT_USERNAME=project-admin
+      - MONGO_INITDB_ROOT_PASSWORD=somesecurepassword
+    volumes:
+      - ./config/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./data/mongodb:/data
+    command: ["--bind_ip_all"]
+    restart: unless-stopped
+    networks:
+      - mongodb
+
+  api:
+    build: .
+    ports:
+      - 4000:4000
+    environment:
+      - DB_NAME=nodejs-device-auth
+      - DB_HOST=mongodb
+      - DB_PORT=27017
+      - DB_USER=api
+      - DB_PASSWORD=password
+      - NODE_ENV=development
+      - PROXY_IN_USE=true
+      - PORT=4000
+    restart: unless-stopped
+    networks:
+      - mongodb
+      - public
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - 80:80
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf
+      - ./logs/nginx:/var/logs/nginx
+      - ./data/nginx:/data/nginx
+    restart: unless-stopped
+    depends_on:
+      - api
+    networks:
+      - public
+
+networks:
+  mongodb:
+    driver: bridge
+  public:
+    driver: bridge
