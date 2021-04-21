@@ -4,12 +4,15 @@
  */
 
 import express from "express";
+import User from "./models/user";
 
 export const buildApp = () => {
   const app = express();
 
-  app.get("/", async (req, res) => {
-    return res.status(200).send("Hello world!");
+  app.get("/health", async (req, res) => {
+    const count = await User.count();
+
+    return res.status(200).send({ count });
   });
 
   return app;
