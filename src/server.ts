@@ -9,7 +9,6 @@ import { buildApp } from "./app";
 import { DATABASE, PORT } from "./settings";
 
 // Build and start the Express application
-
 const app = buildApp();
 
 app.listen(PORT, () => {

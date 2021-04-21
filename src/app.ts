@@ -6,9 +6,13 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
+import expressJwt from "express-jwt";
 
 import User from "./models/user";
 import { authRoutes } from "./routes";
+import { authErrors } from "./middleware";
+
+import * as settings from "./settings";
 
 export const buildApp = () => {
   const app = express();
@@ -16,6 +20,18 @@ export const buildApp = () => {
   app.use(bodyParser.json());
 
   app.use(cookieParser(process.env.COOKIE_SECRET || "some_secret_key"));
+
+  app.use(
+    expressJwt({
+      secret: settings.AUTH.jwtKey,
+      issuer: settings.AUTH.jwtIssuer,
+      audience: settings.AUTH.jwtAudience,
+      algorithms: ["HS256"],
+      credentialsRequired: false,
+    })
+  );
+
+  app.use(authErrors);
 
   app.use("/auth", authRoutes());
 

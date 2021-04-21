@@ -25,6 +25,15 @@ interface IRegistrationInput extends IUserInput {
   confirmPassword: string;
 }
 
+export interface IAuthenticatedUser {
+  id: string;
+  iat: number;
+  exp: number;
+  aud: number;
+  iss: number;
+  sub: string;
+}
+
 export class AuthService {
   config: IAuthConfig;
 
