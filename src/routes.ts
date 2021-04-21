@@ -5,10 +5,13 @@
 
 import { Router } from "express";
 
-import { createUser } from "./controllers";
+import { login, register } from "./controllers";
 
-export const userRoutes = () => {
-  const route = Router();
+export const authRoutes = () => {
+  const router = Router();
 
-  route.post("/", createUser);
+  router.post("/register", register);
+  router.post("/login", login);
+
+  return router;
 };

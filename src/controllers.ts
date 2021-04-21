@@ -4,12 +4,49 @@
  */
 
 import { Request, Response } from "express";
-import UserModel from "./models/user";
 
-export const createUser = async (req: Request, res: Response) => {
-  const user = new UserModel(req.body);
+import { AuthService } from "./services";
+import { ServiceError } from "./services/utils";
 
-  await user.save();
+import * as settings from "./settings";
 
-  return res.status(201).json(user.toObject());
+export const register = async (req: Request, res: Response) => {
+  try {
+    const service = new AuthService(settings.AUTH);
+
+    const user = req.body.user;
+
+    const device = {
+      ...req.body.device,
+      address: req.headers.forwarded || req.connection.remoteAddress,
+    };
+
+    const result = await service.register(user, device);
+
+    return res.status(201).json(result);
+  } catch (e) {
+    if (e instanceof ServiceError) return res.status(e.status).json(e);
+    return res.status(500).json(new ServiceError());
+  }
+};
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    const { username, password, device } = req.body;
+
+    const service = new AuthService(settings.AUTH);
+
+    const result = await service.login(
+      { username, password },
+      {
+        ...device,
+        address: req.headers.forwarded || req.connection.remoteAddress,
+      }
+    );
+
+    return res.status(200).json(result);
+  } catch (e) {
+    if (e instanceof ServiceError) return res.status(e.status).json(e);
+    return res.status(500).json(new ServiceError());
+  }
 };

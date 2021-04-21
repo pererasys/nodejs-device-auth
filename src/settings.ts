@@ -3,6 +3,15 @@
  * Copyright (c) 2021
  */
 
+export const AUTH = {
+  jwtKey: process.env.JWT_KEY || "test_key",
+  jwtAudience: process.env.JWT_AUDIENCE || "nodejs-device-auth",
+  jwtIssuer: process.env.JWT_ISSUER || "http://localhost:4000",
+  jwtSubject: process.env.JWT_SUBJECT || "Device management API",
+  jwtExpiration: process.env.JWT_EXPIRATION || "15 minutes",
+  refreshCookie: process.env.REFRESH_COOKIE || "device_token",
+};
+
 export const PORT = process.env.PORT || 4000;
 
 export const DATABASE = {
