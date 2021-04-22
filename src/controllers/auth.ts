@@ -87,7 +87,7 @@ export const login = async (req: Request, res: Response) => {
       };
     }
 
-    return res.status(201).json(response);
+    return res.status(200).json(response);
   } catch (e) {
     if (e instanceof ServiceError) return res.status(e.status).json(e);
     return res.status(500).json(new ServiceError());
