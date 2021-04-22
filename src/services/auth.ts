@@ -9,7 +9,11 @@ import { uid } from "rand-token";
 import { Model } from "mongoose";
 
 import User, { IUserDocument, IUserInput } from "../models/user";
-import Device, { IDeviceDocument, IDeviceInput } from "../models/device";
+import Device, {
+  IDeviceDocument,
+  IDeviceInput,
+  IRefreshTokenDocument,
+} from "../models/device";
 
 import { UserService } from "./users";
 
@@ -140,19 +144,32 @@ export class AuthService {
   ) {
     const credentials = await this.getCredentials(user);
 
-    let registeredDevice = await this.deviceModel.findOne({
+    let rDevice = await this.deviceModel.findOne({
       identifier: device.identifier,
       user: user.id,
     });
 
-    if (!registeredDevice) registeredDevice = new this.deviceModel(device);
+    if (!rDevice) {
+      const { identifier, platform } = device;
 
-    registeredDevice.platform = device.platform;
-    registeredDevice.address = device.address;
-    registeredDevice.user = user.id;
-    registeredDevice.token = credentials.refreshToken;
+      rDevice = new this.deviceModel({
+        identifier,
+        platform,
+        user: user.id,
+      });
+    }
 
-    await registeredDevice.save();
+    const addressCount = rDevice.addresses.length;
+
+    if (
+      addressCount === 0 ||
+      rDevice.addresses[addressCount - 1].address !== device.address
+    )
+      rDevice.addresses.push({ address: device.address });
+
+    rDevice.tokens.push({ token: credentials.refreshToken });
+
+    await rDevice.save();
 
     return credentials;
   }
@@ -208,19 +225,59 @@ export class AuthService {
 
   /**
    * Logs a user in and returns their credentials
+   * @param {IDeviceInput} device
    * @param {string} token
-   * @param {string} identifier
    */
-  async refresh(identifier: string, token: string) {
+  async refresh(device: IDeviceInput, token: string) {
     try {
-      const device = await this.deviceModel
-        .findOne({ identifier, token })
+      const rDevice = await this.deviceModel
+        .findOne({ identifier: device.identifier })
         .populate("user");
 
-      return await this.signToken(device.user as IUserDocument);
+      let shouldSaveDevice = false;
+
+      const tokens = rDevice.tokens.filter((t) => t.token === token);
+
+      const error = new ServiceError("Invalid token.", 403);
+
+      if (tokens.length === 0) throw error;
+
+      if (
+        rDevice.addresses[rDevice.addresses.length - 1].address !==
+        device.address
+      ) {
+        rDevice.addresses.push({ address: device.address });
+        shouldSaveDevice = true;
+      }
+
+      let shouldAuthenticate = false;
+
+      tokens.some(async (t) => {
+        if (typeof t.revokedAt === "undefined") {
+          if (t.expiresAt < new Date()) {
+            t.revokedAt = new Date();
+            t.revokedReason = "expired";
+            shouldSaveDevice = true;
+
+            error.message = "Token expired.";
+
+            return false;
+          } else {
+            shouldAuthenticate = true;
+            return true;
+          }
+        }
+        return false;
+      });
+
+      if (shouldSaveDevice) await rDevice.save();
+
+      if (shouldAuthenticate)
+        return await this.signToken(rDevice.user as IUserDocument);
+      else throw error;
     } catch (e) {
       if (e instanceof ServiceError) throw e;
-      else this.throwDefaultAuthenticationError();
+      else throw new ServiceError();
     }
   }
 }

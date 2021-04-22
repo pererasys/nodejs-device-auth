@@ -8,6 +8,7 @@ const {
 } = require("../__utils");
 
 const { default: User } = require("../../models/user");
+const { default: Device } = require("../../models/device");
 const {
   AuthService,
   ServiceError,
@@ -161,6 +162,44 @@ describe("login", () => {
     expect(result.credentials).toHaveProperty("refreshToken");
     expect(typeof result.credentials.accessToken).toEqual("string");
     expect(typeof result.credentials.refreshToken).toEqual("string");
+  });
+});
+
+describe("refresh", () => {
+  let user;
+  let device;
+
+  beforeEach(async () => {
+    user = new User({
+      username: "test_user",
+      password: await bcrypt.hash("ab12cd34", 10),
+    });
+
+    await user.save();
+
+    device = new Device({
+      user: user.id,
+      identifier: "1",
+      platform: "web",
+      addresses: [{ address: "127.0.0.1" }],
+      tokens: [{ token: "some_refresh_token" }],
+    });
+
+    await device.save();
+  });
+
+  it("refresh - should return a signed JWT", async () => {
+    const mockToken = "some_refresh_token";
+
+    const mockDeviceInput = {
+      identifier: "1",
+      platform: "web",
+      address: "127.0.0.1",
+    };
+
+    const result = await service.refresh(mockDeviceInput, mockToken);
+
+    expect(typeof result).toEqual("string");
   });
 });
 

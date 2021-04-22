@@ -111,5 +111,5 @@ const mockUser = {
 const mockDevice = {
   identifier: "1",
   platform: "web",
-  address: "127.0.0.1",
+  addresses: [{ address: "127.0.0.1" }],
 };

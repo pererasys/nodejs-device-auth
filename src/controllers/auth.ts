@@ -49,3 +49,24 @@ export const login = async (req: Request, res: Response) => {
     return res.status(500).json(new ServiceError());
   }
 };
+
+export const refresh = async (req: Request, res: Response) => {
+  try {
+    const { token, device } = req.body;
+
+    const service = new AuthService(settings.AUTH);
+
+    const accessToken = await service.refresh(
+      {
+        ...device,
+        address: req.headers.forwarded || req.connection.remoteAddress,
+      },
+      token
+    );
+
+    return res.status(200).json({ accessToken });
+  } catch (e) {
+    if (e instanceof ServiceError) return res.status(e.status).json(e);
+    return res.status(500).json(new ServiceError());
+  }
+};
