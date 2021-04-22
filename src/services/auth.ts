@@ -22,6 +22,7 @@ interface IAuthConfig {
   jwtIssuer: string;
   jwtSubject: string;
   jwtExpiration: string;
+  refreshExpiration: number;
 }
 
 interface IRegistrationInput extends IUserInput {
@@ -256,6 +257,13 @@ export class AuthService {
             return false;
           } else {
             shouldAuthenticate = true;
+
+            const newExp = new Date();
+            newExp.setDate(newExp.getDate() + this.config.refreshExpiration);
+
+            t.expiresAt = newExp;
+            shouldSaveDevice = true;
+
             return true;
           }
         }
