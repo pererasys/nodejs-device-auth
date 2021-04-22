@@ -25,6 +25,7 @@ export class DeviceService {
       identifier: device.identifier,
       platform: device.platform,
       address: device.address,
+      loggedIn: device.token !== null,
       createdAt: device.createdAt,
       updatedAt: device.updatedAt,
     };
