@@ -24,8 +24,11 @@ export class DeviceService {
       id: device.id,
       identifier: device.identifier,
       platform: device.platform,
-      address: device.address,
-      loggedIn: device.token !== null,
+      address: device.addresses[device.addresses.length - 1].address,
+      loggedIn:
+        device.tokens.length > 0
+          ? !device.tokens[device.tokens.length - 1].revokedAt
+          : false,
       createdAt: device.createdAt,
       updatedAt: device.updatedAt,
     };

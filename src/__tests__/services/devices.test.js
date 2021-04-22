@@ -49,6 +49,7 @@ describe("getByUser", () => {
       expect(device).toHaveProperty("identifier");
       expect(device).toHaveProperty("platform");
       expect(device).toHaveProperty("address");
+      expect(device).toHaveProperty("loggedIn");
       expect(device).toHaveProperty("createdAt");
       expect(device).toHaveProperty("updatedAt");
     });
@@ -58,5 +59,5 @@ describe("getByUser", () => {
 const mockDevice = {
   identifier: "1",
   platform: "web",
-  address: "127.0.0.1",
+  addresses: [{ address: "127.0.0.1" }],
 };

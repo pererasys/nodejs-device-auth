@@ -140,19 +140,32 @@ export class AuthService {
   ) {
     const credentials = await this.getCredentials(user);
 
-    let registeredDevice = await this.deviceModel.findOne({
+    let rDevice = await this.deviceModel.findOne({
       identifier: device.identifier,
       user: user.id,
     });
 
-    if (!registeredDevice) registeredDevice = new this.deviceModel(device);
+    if (!rDevice) {
+      const { identifier, platform } = device;
 
-    registeredDevice.platform = device.platform;
-    registeredDevice.address = device.address;
-    registeredDevice.user = user.id;
-    registeredDevice.token = credentials.refreshToken;
+      rDevice = new this.deviceModel({
+        identifier,
+        platform,
+        user: user.id,
+      });
+    }
 
-    await registeredDevice.save();
+    const addressCount = rDevice.addresses.length;
+
+    if (
+      addressCount === 0 ||
+      rDevice.addresses[addressCount - 1].address !== device.address
+    )
+      rDevice.addresses.push({ address: device.address });
+
+    rDevice.tokens.push({ token: credentials.refreshToken });
+
+    await rDevice.save();
 
     return credentials;
   }
