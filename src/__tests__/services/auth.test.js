@@ -13,11 +13,11 @@ const {
 } = require("../__utils");
 
 const { default: User } = require("../../models/user");
-const { AuthService } = require("../../services/auth");
 const {
+  AuthService,
   ServiceError,
   ValidationError,
-} = require("../../services/utils/errors");
+} = require("../../services");
 
 beforeAll(async () => await buildDatabase());
 

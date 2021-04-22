@@ -59,7 +59,7 @@ export class AuthService {
 
   /**
    * Transforms a user document into an acceptable JSON response
-   * @param {UserObject} user
+   * @param {IUserDocument} user
    */
   private transformUser(user: IUserDocument) {
     return {
@@ -153,6 +153,7 @@ export class AuthService {
 
     let registeredDevice = await this.deviceModel.findOne({
       identifier: device.identifier,
+      user: user.id,
     });
 
     if (!registeredDevice) registeredDevice = new this.deviceModel(device);
@@ -206,11 +207,9 @@ export class AuthService {
 
       const user = await this.userModel.findOne({ username });
 
-      const credentials = await this.authenticate(user, password, device);
-
       return {
         user: this.transformUser(user),
-        credentials,
+        credentials: await this.authenticate(user, password, device),
       };
     } catch (e) {
       if (e instanceof ServiceError) throw e;

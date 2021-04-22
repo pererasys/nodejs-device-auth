@@ -32,6 +32,11 @@ const DeviceSchema = new Schema(
       required: true,
       index: true,
     },
+    platform: {
+      type: String,
+      required: true,
+      enum: ["web", "ios", "android"],
+    },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",

@@ -5,8 +5,7 @@
 
 import { Request, Response } from "express";
 
-import { AuthService } from "./services";
-import { ServiceError } from "./services/utils";
+import { AuthService, ServiceError } from "./services";
 
 import * as settings from "./settings";
 

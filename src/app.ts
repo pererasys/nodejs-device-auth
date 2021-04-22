@@ -9,7 +9,7 @@ import bodyParser from "body-parser";
 import expressJwt from "express-jwt";
 
 import User from "./models/user";
-import { authRoutes } from "./routes";
+import * as routes from "./routes";
 import { authErrors } from "./middleware";
 
 import * as settings from "./settings";
@@ -33,7 +33,7 @@ export const buildApp = () => {
 
   app.use(authErrors);
 
-  app.use("/auth", authRoutes());
+  app.use("/auth", routes.auth());
 
   app.get("/health", async (req, res) => {
     const count = await User.countDocuments();

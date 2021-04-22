@@ -4,9 +4,9 @@ const {
   buildDatabase,
   clearDatabase,
   terminateDatabase,
-} = require("./__utils");
+} = require("../__utils");
 
-const { buildApp } = require("../app");
+const { buildApp } = require("../../app");
 
 const app = buildApp();
 
