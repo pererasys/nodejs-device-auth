@@ -202,7 +202,6 @@ export class AuthService {
         credentials: await this.authenticationSuccess(user, device),
       };
     } catch (e) {
-      console.log(e);
       if (e instanceof ServiceError) throw e;
       else if (e.code === 11000 && typeof e.keyValue.username !== "undefined") {
         throw new ValidationError("This username is taken.", ["username"]);
