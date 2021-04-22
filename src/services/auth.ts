@@ -256,9 +256,17 @@ export class AuthService {
             return false;
           } else {
             shouldAuthenticate = true;
+
+            const newExp = new Date();
+            newExp.setDate(newExp.getDate() + 30);
+
+            t.expiresAt = newExp;
+            shouldSaveDevice = true;
+
             return true;
           }
         }
+
         return false;
       });
 
