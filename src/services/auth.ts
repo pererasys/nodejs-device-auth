@@ -205,4 +205,22 @@ export class AuthService {
       else this.throwDefaultAuthenticationError();
     }
   }
+
+  /**
+   * Logs a user in and returns their credentials
+   * @param {string} token
+   * @param {string} identifier
+   */
+  async refresh(identifier: string, token: string) {
+    try {
+      const device = await this.deviceModel
+        .findOne({ identifier, token })
+        .populate("user");
+
+      return await this.signToken(device.user as IUserDocument);
+    } catch (e) {
+      if (e instanceof ServiceError) throw e;
+      else this.throwDefaultAuthenticationError();
+    }
+  }
 }

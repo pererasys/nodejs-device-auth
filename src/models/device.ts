@@ -5,9 +5,11 @@
 
 import mongoose, { Schema, Model, Document, Types } from "mongoose";
 
+import { IUserDocument } from "./user";
+
 export interface IDevice {
   identifier: string;
-  user: Types.ObjectId;
+  user: Types.ObjectId | IUserDocument;
   platform: "ios" | "android" | "web";
   address: string;
   token: string;

@@ -9,6 +9,8 @@ import bodyParser from "body-parser";
 import expressJwt from "express-jwt";
 
 import User from "./models/user";
+import { ServiceError } from "./services";
+
 import * as routes from "./routes";
 import { authErrors } from "./middleware";
 
@@ -38,9 +40,13 @@ export const buildApp = () => {
   app.use("/users", routes.users());
 
   app.get("/health", async (req, res) => {
-    const count = await User.countDocuments();
+    try {
+      const count = await User.countDocuments();
 
-    return res.status(200).send({ count });
+      return res.status(200).json({ count });
+    } catch {
+      return res.status(500).json(new ServiceError());
+    }
   });
 
   return app;
