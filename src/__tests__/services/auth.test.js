@@ -15,22 +15,15 @@ const {
   ValidationError,
 } = require("../../services");
 
+const settings = require("../../settings");
+
 beforeAll(async () => await buildDatabase());
 
 afterEach(async () => await clearDatabase());
 
 afterAll(async () => await terminateDatabase());
 
-const mockConfig = {
-  jwtKey: "some_super_secret_key",
-  jwtAudience: "audience",
-  jwtIssuer: "issuer",
-  jwtSubject: "the subject",
-  jwtExpiration: "10 minutes",
-  refreshCookie: "refresh_token",
-};
-
-const service = new AuthService(mockConfig);
+const service = new AuthService(settings.AUTH);
 
 test("getDefaultAuthenticationError - should return the default authentication error", () => {
   try {
@@ -47,9 +40,9 @@ test("signToken - should properly sign a JWT", async () => {
   const decoded = decodeJWT(token);
 
   expect(decoded.id).toEqual(mockUserDocument.id);
-  expect(decoded.iss).toEqual(mockConfig.jwtIssuer);
-  expect(decoded.sub).toEqual(mockConfig.jwtSubject);
-  expect(decoded.aud).toEqual(mockConfig.jwtAudience);
+  expect(decoded.iss).toEqual(settings.AUTH.jwtIssuer);
+  expect(decoded.sub).toEqual(settings.AUTH.jwtSubject);
+  expect(decoded.aud).toEqual(settings.AUTH.jwtAudience);
 });
 
 describe("validatePassword", () => {
