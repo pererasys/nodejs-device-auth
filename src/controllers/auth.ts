@@ -10,6 +10,21 @@ import { AuthService, ServiceError } from "../services";
 
 import * as settings from "../settings";
 
+const setRefreshCookie = (token: string, res: Response) => {
+  const tokenExpiration = new Date();
+  tokenExpiration.setDate(
+    tokenExpiration.getDate() + settings.AUTH.refreshExpiration
+  );
+
+  res.cookie(settings.AUTH.refreshCookie, token, {
+    expires: tokenExpiration,
+    httpOnly: true,
+    path: "/",
+    signed: true,
+    secure: settings.HTTPS_ONLY,
+  });
+};
+
 export const register = async (req: Request, res: Response) => {
   try {
     const service = new AuthService(settings.AUTH);
@@ -23,7 +38,21 @@ export const register = async (req: Request, res: Response) => {
 
     const result = await service.register(user, device);
 
-    return res.status(201).json(result);
+    let response = result;
+
+    if (device.platform === "web") {
+      setRefreshCookie(result.credentials.refreshToken, res);
+
+      response = {
+        ...result,
+        credentials: {
+          ...result.credentials,
+          refreshToken: "",
+        },
+      };
+    }
+
+    return res.status(201).json(response);
   } catch (e) {
     if (e instanceof ServiceError) return res.status(e.status).json(e);
     return res.status(500).json(new ServiceError());
@@ -44,7 +73,21 @@ export const login = async (req: Request, res: Response) => {
       }
     );
 
-    return res.status(200).json(result);
+    let response = result;
+
+    if (device.platform === "web") {
+      setRefreshCookie(result.credentials.refreshToken, res);
+
+      response = {
+        ...result,
+        credentials: {
+          ...result.credentials,
+          refreshToken: "",
+        },
+      };
+    }
+
+    return res.status(201).json(response);
   } catch (e) {
     if (e instanceof ServiceError) return res.status(e.status).json(e);
     return res.status(500).json(new ServiceError());

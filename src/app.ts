@@ -7,6 +7,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import expressJwt from "express-jwt";
+import helmet from "helmet";
 
 import User from "./models/user";
 import { ServiceError } from "./services";
@@ -19,9 +20,11 @@ import * as settings from "./settings";
 export const buildApp = () => {
   const app = express();
 
+  app.use(helmet());
+
   app.use(bodyParser.json());
 
-  app.use(cookieParser(process.env.COOKIE_SECRET || "some_secret_key"));
+  app.use(cookieParser(settings.COOKIE_SECRET));
 
   app.use(
     expressJwt({

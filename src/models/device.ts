@@ -7,6 +7,8 @@ import mongoose, { Schema, Model, Document, Types } from "mongoose";
 
 import { IUserDocument } from "./user";
 
+import * as settings from "../settings";
+
 export interface IRefreshToken {
   token: string;
   revokedReason: "logout" | "expired";
@@ -67,7 +69,7 @@ const RefreshTokenSchema = new Schema(
       required: true,
       default: () => {
         const date = new Date();
-        date.setDate(date.getDate() + 30);
+        date.setDate(date.getDate() + settings.AUTH.refreshExpiration);
         return date;
       },
     },

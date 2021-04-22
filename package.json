@@ -18,6 +18,7 @@
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
     "express-jwt": "^6.0.0",
+    "helmet": "^4.5.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.5",
     "rand-token": "^1.0.1"
