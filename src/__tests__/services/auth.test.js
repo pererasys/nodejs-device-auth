@@ -1,8 +1,3 @@
-/**
- * @author Andrew Perera
- * Copyright (C) 2020 - All rights reserved
- */
-
 const bcrypt = require("bcrypt");
 const decodeJWT = require("jwt-decode");
 
@@ -142,7 +137,7 @@ describe("login", () => {
     await user.save();
   });
 
-  test("login - should authenticate a user", async () => {
+  it("login - should authenticate a user", async () => {
     const mockUserInput = {
       username: "test_user",
       password: "ab12cd34",
