@@ -10,6 +10,7 @@ const {
 const { buildApp } = require("../../app");
 
 const { default: User } = require("../../models/user");
+const { default: Device } = require("../../models/device");
 
 const app = buildApp();
 
@@ -88,6 +89,64 @@ describe("register", () => {
       .send(body);
 
     expect(res.statusCode).toEqual(201);
+  });
+});
+
+describe("refresh", () => {
+  beforeEach(async () => {
+    user = new User({
+      username: "test_user",
+      password: await bcrypt.hash("ab12cd34", 10),
+    });
+
+    await user.save();
+
+    device = new Device({
+      user: user.id,
+      identifier: "1",
+      platform: "web",
+      addresses: [{ address: "127.0.0.1" }],
+      tokens: [{ token: "some_refresh_token" }],
+    });
+
+    await device.save();
+  });
+
+  afterEach(async () => await clearDatabase());
+
+  it("should respond with 200", async () => {
+    const body = {
+      token: "some_refresh_token",
+      device: {
+        identifier: "1",
+        platform: "web",
+      },
+    };
+
+    const res = await request(app)
+      .post("/auth/refresh")
+      .set("Content-Type", "application/json")
+      .send(body);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty("accessToken");
+  });
+
+  it("should respond with 403", async () => {
+    const body = {
+      token: "wrong_token",
+      device: {
+        identifier: "1",
+        platform: "web",
+      },
+    };
+
+    const res = await request(app)
+      .post("/auth/refresh")
+      .set("Content-Type", "application/json")
+      .send(body);
+
+    expect(res.statusCode).toEqual(403);
   });
 });
 
