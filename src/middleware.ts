@@ -14,7 +14,6 @@ export const authErrors = (
   next: NextFunction
 ) => {
   if (err) {
-    console.log(err);
     if (err.message === "jwt expired")
       res.status(401).send({ error: { message: "Token expired." } });
     else res.status(401).send({ error: { message: "Invalid token." } });
