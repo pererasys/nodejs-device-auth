@@ -5,14 +5,23 @@
 
 import { Router } from "express";
 
-import { login, register } from "./controllers";
-import { isNotAuthenticated } from "./middleware";
+import { login, register, me, devices } from "./controllers";
+import { isAuthenticated, isNotAuthenticated } from "./middleware";
 
 export const auth = () => {
   const router = Router();
 
   router.post("/register", isNotAuthenticated, register);
   router.post("/login", isNotAuthenticated, login);
+
+  return router;
+};
+
+export const users = () => {
+  const router = Router();
+
+  router.get("/me", isAuthenticated, me);
+  router.get("/devices", isAuthenticated, devices);
 
   return router;
 };

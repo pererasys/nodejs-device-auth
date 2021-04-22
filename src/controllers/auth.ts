@@ -5,9 +5,9 @@
 
 import { Request, Response } from "express";
 
-import { AuthService, ServiceError } from "./services";
+import { AuthService, ServiceError } from "../services";
 
-import * as settings from "./settings";
+import * as settings from "../settings";
 
 export const register = async (req: Request, res: Response) => {
   try {

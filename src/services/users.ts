@@ -16,16 +16,29 @@ export class UserService {
   }
 
   /**
+   * Transforms a user document into an acceptable JSON response
+   * @param {IUserDocument} user
+   */
+  static transformUser(user: IUserDocument) {
+    return {
+      id: user.id,
+      username: user.username,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+  /**
    * Returns the user with the given ID
    * @param {string} id
    */
   async getByID(id: string) {
     try {
-      const user = this.model.findById(id);
+      const user = await this.model.findById(id);
 
       if (!user) throw Error();
 
-      return user;
+      return UserService.transformUser(user);
     } catch {
       throw new ServiceError("Not found.", 404);
     }

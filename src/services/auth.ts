@@ -11,6 +11,8 @@ import { Model } from "mongoose";
 import User, { IUserDocument, IUserInput } from "../models/user";
 import Device, { IDeviceDocument, IDeviceInput } from "../models/device";
 
+import { UserService } from "./users";
+
 import { ServiceError, ValidationError } from "./utils";
 
 interface IAuthConfig {
@@ -55,19 +57,6 @@ export class AuthService {
       "We couldn't log you in with the provided credentials",
       ["identifier", "password"]
     );
-  }
-
-  /**
-   * Transforms a user document into an acceptable JSON response
-   * @param {IUserDocument} user
-   */
-  private transformUser(user: IUserDocument) {
-    return {
-      id: user.id,
-      username: user.username,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
   }
 
   /**
@@ -185,7 +174,7 @@ export class AuthService {
       await user.save();
 
       return {
-        user: this.transformUser(user),
+        user: UserService.transformUser(user),
         credentials: await this.authenticationSuccess(user, device),
       };
     } catch (e) {
@@ -208,7 +197,7 @@ export class AuthService {
       const user = await this.userModel.findOne({ username });
 
       return {
-        user: this.transformUser(user),
+        user: UserService.transformUser(user),
         credentials: await this.authenticate(user, password, device),
       };
     } catch (e) {

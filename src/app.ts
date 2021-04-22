@@ -35,6 +35,8 @@ export const buildApp = () => {
 
   app.use("/auth", routes.auth());
 
+  app.use("/users", routes.users());
+
   app.get("/health", async (req, res) => {
     const count = await User.countDocuments();
 

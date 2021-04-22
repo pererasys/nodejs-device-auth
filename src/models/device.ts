@@ -3,11 +3,11 @@
  * Copyright (c) 2021
  */
 
-import mongoose, { Schema, Model, Document } from "mongoose";
+import mongoose, { Schema, Model, Document, Types } from "mongoose";
 
 export interface IDevice {
   identifier: string;
-  user: Schema.Types.ObjectId;
+  user: Types.ObjectId;
   platform: "ios" | "android" | "web";
   address: string;
   token: string;
