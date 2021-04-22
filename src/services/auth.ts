@@ -30,11 +30,6 @@ interface IRegistrationInput extends IUserInput {
 
 export interface IAuthenticatedUser {
   id: string;
-  iat: number;
-  exp: number;
-  aud: number;
-  iss: number;
-  sub: string;
 }
 
 export class AuthService {
