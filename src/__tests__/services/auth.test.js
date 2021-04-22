@@ -203,6 +203,42 @@ describe("refresh", () => {
   });
 });
 
+describe("logout", () => {
+  let user;
+  let device;
+
+  beforeEach(async () => {
+    user = new User({
+      username: "test_user",
+      password: await bcrypt.hash("ab12cd34", 10),
+    });
+
+    await user.save();
+
+    device = new Device({
+      user: user.id,
+      identifier: "1",
+      platform: "web",
+      addresses: [{ address: "127.0.0.1" }],
+      tokens: [{ token: "some_refresh_token" }],
+    });
+
+    await device.save();
+  });
+
+  it("should return success string", async () => {
+    const mockDeviceInput = {
+      identifier: "1",
+      platform: "web",
+      address: "127.0.0.1",
+    };
+
+    const result = await service.logout(user.id, mockDeviceInput);
+
+    expect(typeof result).toEqual("string");
+  });
+});
+
 const mockUserDocument = {
   id: "1",
   username: "test_user",

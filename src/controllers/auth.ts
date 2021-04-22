@@ -78,12 +78,12 @@ export const logout = async (req: IAuthenticatedRequest, res: Response) => {
 
     const service = new AuthService(settings.AUTH);
 
-    const accessToken = await service.logout(req.user.id, {
+    const message = await service.logout(req.user.id, {
       ...device,
       address: req.headers.forwarded || req.connection.remoteAddress,
     });
 
-    return res.status(200).json({ accessToken });
+    return res.status(200).json({ message });
   } catch (e) {
     if (e instanceof ServiceError) return res.status(e.status).json(e);
     return res.status(500).json(new ServiceError());
