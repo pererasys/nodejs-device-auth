@@ -6,14 +6,11 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uid } from "rand-token";
-import { Model } from "mongoose";
+
+import { Model, Types } from "mongoose";
 
 import User, { IUserDocument, IUserInput } from "../models/user";
-import Device, {
-  IDeviceDocument,
-  IDeviceInput,
-  IRefreshTokenDocument,
-} from "../models/device";
+import Device, { IDeviceDocument, IDeviceInput } from "../models/device";
 
 import { UserService } from "./users";
 
@@ -275,6 +272,34 @@ export class AuthService {
       if (shouldAuthenticate)
         return await this.signToken(rDevice.user as IUserDocument);
       else throw error;
+    } catch (e) {
+      if (e instanceof ServiceError) throw e;
+      else throw new ServiceError();
+    }
+  }
+
+  /**
+   * Logs out a user
+   * @param {string} user
+   * @param {IDeviceInput} device
+   */
+  async logout(user: string, device: IDeviceInput) {
+    try {
+      const rDevice = await this.deviceModel.findOne({
+        user: new Types.ObjectId(user),
+        identifier: device.identifier,
+      });
+
+      if (!rDevice) throw new ServiceError();
+
+      const activeToken = rDevice.tokens[rDevice.tokens.length - 1];
+
+      activeToken.revokedAt = new Date();
+      activeToken.revokedReason = "logout";
+
+      await rDevice.save();
+
+      return "Successfully logged out.";
     } catch (e) {
       if (e instanceof ServiceError) throw e;
       else throw new ServiceError();

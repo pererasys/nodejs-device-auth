@@ -5,7 +5,7 @@
 
 import { Router } from "express";
 
-import { login, register, refresh, me, devices } from "./controllers";
+import { login, register, refresh, logout, me, devices } from "./controllers";
 import { isAuthenticated, isNotAuthenticated } from "./middleware";
 
 export const auth = () => {
@@ -14,6 +14,7 @@ export const auth = () => {
   router.post("/register", isNotAuthenticated, register);
   router.post("/login", isNotAuthenticated, login);
   router.post("/refresh", isNotAuthenticated, refresh);
+  router.post("/logout", isAuthenticated, logout);
 
   return router;
 };

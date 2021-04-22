@@ -67,7 +67,7 @@ const RefreshTokenSchema = new Schema(
       required: true,
       default: () => {
         const date = new Date();
-        date.setMilliseconds(date.getMilliseconds() + 30);
+        date.setDate(date.getDate() + 30);
         return date;
       },
     },

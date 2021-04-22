@@ -4,6 +4,7 @@
  */
 
 import { Request, Response } from "express";
+import { IAuthenticatedRequest } from "src/middleware";
 
 import { AuthService, ServiceError } from "../services";
 
@@ -63,6 +64,24 @@ export const refresh = async (req: Request, res: Response) => {
       },
       token
     );
+
+    return res.status(200).json({ accessToken });
+  } catch (e) {
+    if (e instanceof ServiceError) return res.status(e.status).json(e);
+    return res.status(500).json(new ServiceError());
+  }
+};
+
+export const logout = async (req: IAuthenticatedRequest, res: Response) => {
+  try {
+    const { device } = req.body;
+
+    const service = new AuthService(settings.AUTH);
+
+    const accessToken = await service.logout(req.user.id, {
+      ...device,
+      address: req.headers.forwarded || req.connection.remoteAddress,
+    });
 
     return res.status(200).json({ accessToken });
   } catch (e) {
