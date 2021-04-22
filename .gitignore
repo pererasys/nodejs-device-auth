@@ -115,8 +115,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-nodemon.json
-
 # tests
 /test-results
 
