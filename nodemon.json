@@ -1,0 +1,11 @@
+{
+  "env": {
+    "DB_NAME": "nodejs-device-auth",
+    "DB_HOST": "127.0.0.1",
+    "DB_PORT": "27017",
+    "DB_USER": "api",
+    "DB_PASSWORD": "password",
+    "NODE_ENV": "development",
+    "PORT": 4000
+  }
+}
