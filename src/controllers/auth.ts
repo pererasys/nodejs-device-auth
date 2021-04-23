@@ -3,24 +3,19 @@
  * Copyright (c) 2021
  */
 
-import { Request, Response } from "express";
+import { Response } from "express";
 
 import { AuthService, ServiceError } from "../services";
 
 import * as settings from "../settings";
 
-export const register = async (req: Request, res: Response) => {
+import { IRequest } from "../middleware";
+
+export const register = async (req: IRequest, res: Response) => {
   try {
     const service = new AuthService(settings.AUTH);
 
-    const user = req.body.user;
-
-    const device = {
-      ...req.body.device,
-      address: req.headers.forwarded || req.connection.remoteAddress,
-    };
-
-    const result = await service.register(user, device);
+    const result = await service.register(req.body, req.client);
 
     return res.status(201).json(result);
   } catch (e) {
@@ -29,19 +24,11 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: IRequest, res: Response) => {
   try {
-    const { username, password, device } = req.body;
-
     const service = new AuthService(settings.AUTH);
 
-    const result = await service.login(
-      { username, password },
-      {
-        ...device,
-        address: req.headers.forwarded || req.connection.remoteAddress,
-      }
-    );
+    const result = await service.login(req.body, req.client);
 
     return res.status(200).json(result);
   } catch (e) {

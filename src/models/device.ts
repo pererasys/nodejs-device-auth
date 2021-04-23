@@ -23,10 +23,9 @@ export interface IIPAddress {
 }
 
 export interface IDevice {
-  identifier: string;
   user: Types.ObjectId | IUserDocument;
-  platform: "ios" | "android" | "web";
-  addresses: Types.Array<IIPAddressDocument>;
+  agents: Types.Array<string>;
+  hosts: Types.Array<IIPAddressDocument>;
   tokens: Types.Array<IRefreshTokenDocument>;
   createdAt: Date;
   updatedAt: Date;
@@ -82,22 +81,16 @@ const RefreshTokenSchema = new Schema(
 
 const DeviceSchema = new Schema(
   {
-    identifier: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    platform: {
-      type: String,
-      required: true,
-      enum: ["web", "ios", "android"],
-    },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    addresses: { type: [IPAddressSchema], default: [] },
+    agents: {
+      type: [String],
+      required: true,
+    },
+    hosts: { type: [IPAddressSchema], required: true },
     tokens: { type: [RefreshTokenSchema], default: [] },
   },
   { timestamps: true, collection: "devices" }

@@ -10,7 +10,7 @@ import expressJwt from "express-jwt";
 
 import User from "./models/user";
 import * as routes from "./routes";
-import { authErrors } from "./middleware";
+import { authErrors, clientInfo } from "./middleware";
 
 import * as settings from "./settings";
 
@@ -20,6 +20,8 @@ export const buildApp = () => {
   app.use(bodyParser.json());
 
   app.use(cookieParser(process.env.COOKIE_SECRET || "some_secret_key"));
+
+  app.use(clientInfo);
 
   app.use(
     expressJwt({
