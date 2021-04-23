@@ -42,6 +42,7 @@ export const clientInfo = (
     host: req.headers.forwarded || req.connection.remoteAddress,
     agent: req.headers["user-agent"],
   };
+
   next();
 };
 

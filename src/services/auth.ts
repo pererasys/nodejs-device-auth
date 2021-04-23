@@ -238,12 +238,8 @@ export class AuthService {
           } else {
             shouldAuthenticate = true;
 
-            console.log(this.config.refreshExpiration);
-
             const newExp = new Date();
             newExp.setDate(newExp.getDate() + this.config.refreshExpiration);
-
-            console.log(newExp);
 
             t.expiresAt = newExp;
 
