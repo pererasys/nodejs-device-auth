@@ -149,7 +149,7 @@ export class AuthService {
     } else {
       device = new this.deviceModel({
         user: user.id,
-        agent: client.agent,
+        agents: [client.agent],
         hosts: [{ address: client.host }],
         tokens: [{ token }],
       });
