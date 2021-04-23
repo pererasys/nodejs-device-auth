@@ -5,6 +5,8 @@
 
 import { NextFunction, Request, Response } from "express";
 
+import * as settings from "./settings";
+
 import { IAuthenticatedUser } from "./services";
 
 export const authErrors = (
@@ -20,7 +22,30 @@ export const authErrors = (
   } else next();
 };
 
-export type IAuthenticatedRequest = Request & {
+export interface IClientInfo {
+  id: string;
+  host: string;
+  agent: string;
+}
+
+export type IRequest = Request & {
+  client: IClientInfo;
+};
+
+export const clientInfo = (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  req.client = {
+    id: (req.query[settings.AUTH.clientCookie] as string) || null,
+    host: req.headers.forwarded || req.connection.remoteAddress,
+    agent: req.headers["user-agent"],
+  };
+  next();
+};
+
+export type IAuthenticatedRequest = IRequest & {
   user: IAuthenticatedUser | undefined;
 };
 
