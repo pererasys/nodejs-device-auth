@@ -1,5 +1,3 @@
-const { Types } = require("mongoose");
-
 const {
   buildDatabase,
   clearDatabase,
