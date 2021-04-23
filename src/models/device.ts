@@ -31,12 +31,6 @@ export interface IDevice {
   updatedAt: Date;
 }
 
-export interface IDeviceInput {
-  identifier: string;
-  platform: "ios" | "android" | "web";
-  address: string;
-}
-
 export interface IDeviceDocument extends IDevice, Document {}
 
 export interface IRefreshTokenDocument extends IRefreshToken, Document {}
