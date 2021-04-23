@@ -2,7 +2,15 @@
 
 A NodeJS REST API with basic device management functionality and a persistent authentication strategy using refreshable JSON web tokens.
 
-![Device Management](https://github.com/pererasys/nodejs-device-auth/blob/1-setup/docs/diagram.png?raw=true)
+![Device Management](https://github.com/pererasys/nodejs-device-auth/blob/3-login/register/docs/diagram.png?raw=true)
+
+## Architecture
+
+In this project, we will be using a refreshable JWT to maintain authentication across multiple devices. When a user logs in or creates an account, we log the device that was used and create a dedicated refresh token which is stored with the device.
+
+Each device has a unique set of refresh tokens, which may only be used in conjunction with said device. These tokens have a set expiration date, which can be extended when access tokens are refreshed, and will be revoked if used after this date. Similarly, all refresh tokens associated with a device are revoked when a user logs out.
+
+![Authentication flow](https://github.com/pererasys/nodejs-device-auth/blob/3-login/register/docs/diagram.png?raw=true)
 
 ## Setup
 
