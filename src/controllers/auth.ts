@@ -78,10 +78,7 @@ export const logout = async (req: IAuthenticatedRequest, res: Response) => {
 
     const service = new AuthService(settings.AUTH);
 
-    const message = await service.logout(req.user.id, {
-      ...device,
-      address: req.headers.forwarded || req.connection.remoteAddress,
-    });
+    const message = await service.logout(req.user.device);
 
     return res.status(200).json({ message });
   } catch (e) {
