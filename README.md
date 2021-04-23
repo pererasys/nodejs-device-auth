@@ -29,6 +29,14 @@ For local development, this project uses Nodemon to take advantage of hot-reload
 yarn start:dev
 ```
 
+While we have a Docker composition to run the whole project, we want to continue using Nodemon in development. The database has been exposed on your local host, so you can start the service by running the container on its own.
+
+```
+docker-compose up mongodb
+```
+
+After the database has started, the NodeJS application should be able to establish a connection.
+
 **Testing the application**
 
 This project has a number of unit and integration test cases backed by Jest and Supertest. Run the following command to perform all test cases.
@@ -38,6 +46,8 @@ yarn test
 ```
 
 ## Production
+
+### Option 1 - Standalone REST API
 
 **Building the application (TS -> JS)**
 
@@ -53,4 +63,12 @@ After compiling the Typescript source into standard javascript, we can run the s
 
 ```
 yarn start
+```
+
+### Option 2 - Docker
+
+In this step we configured a Docker composition for our application to run behind Nginx. To start the containerized application, simply run the following command.
+
+```
+docker-compose up
 ```
