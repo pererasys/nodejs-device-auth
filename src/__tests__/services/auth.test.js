@@ -28,6 +28,7 @@ const mockConfig = {
   jwtSubject: "the subject",
   jwtExpiration: "10 minutes",
   refreshCookie: "refresh_token",
+  clientCookie: "client_id",
 };
 
 const service = new AuthService(mockConfig);
@@ -42,13 +43,12 @@ test("getDefaultAuthenticationError - should return the default authentication e
 });
 
 test("signToken - should properly sign a JWT", async () => {
-  const token = await service.signToken(mockUserDocument, mockDeviceDocument);
+  const token = await service.signToken(mockUserDocument);
 
   const decoded = decodeJWT(token);
 
   expect(decoded.account.id).toEqual(mockUserDocument.id);
   expect(decoded.account.username).toEqual(mockUserDocument.username);
-  expect(decoded.device).toEqual(mockDeviceDocument.id);
   expect(decoded.iss).toEqual(mockConfig.jwtIssuer);
   expect(decoded.sub).toEqual(mockConfig.jwtSubject);
   expect(decoded.aud).toEqual(mockConfig.jwtAudience);
@@ -109,18 +109,25 @@ describe("getCredentials", () => {
   });
 
   it("should retreive credentials", async () => {
-    const credentials = await service.getCredentials(user, mockDeviceInput);
+    const result = await service.getCredentials(user, mockClientInfo);
 
-    expect(typeof credentials.accessToken).toEqual("string");
-    expect(typeof credentials.refreshToken).toEqual("string");
+    expect(result).toHaveProperty("clientID");
+    expect(result).toHaveProperty("accessToken");
+    expect(result).toHaveProperty("refreshToken");
+
+    expect(typeof result.clientID).toEqual("string");
+    expect(typeof result.accessToken).toEqual("string");
+    expect(typeof result.refreshToken).toEqual("string");
   });
 });
 
 test("register - should register a new user", async () => {
-  const result = await service.register(mockUserInput, mockDeviceInput);
+  const result = await service.register(mockUserInput, mockClientInfo);
 
+  expect(result).toHaveProperty("clientID");
   expect(result).toHaveProperty("accessToken");
   expect(result).toHaveProperty("refreshToken");
+  expect(typeof result.clientID).toEqual("string");
   expect(typeof result.accessToken).toEqual("string");
   expect(typeof result.refreshToken).toEqual("string");
 });
@@ -141,16 +148,12 @@ describe("login", () => {
       password: "ab12cd34",
     };
 
-    const mockDeviceInput = {
-      identifier: "1",
-      platform: "web",
-      address: "127.0.0.1",
-    };
+    const result = await service.login(mockUserInput, mockClientInfo);
 
-    const result = await service.login(mockUserInput, mockDeviceInput);
-
+    expect(result).toHaveProperty("clientID");
     expect(result).toHaveProperty("accessToken");
     expect(result).toHaveProperty("refreshToken");
+    expect(typeof result.clientID).toEqual("string");
     expect(typeof result.accessToken).toEqual("string");
     expect(typeof result.refreshToken).toEqual("string");
   });
@@ -170,9 +173,8 @@ describe("refresh", () => {
 
     device = new Device({
       user: user.id,
-      identifier: "1",
-      platform: "web",
-      addresses: [{ address: "127.0.0.1" }],
+      hosts: [{ address: mockClientInfo.host }],
+      agents: [mockClientInfo.agent],
       tokens: [{ token: "some_refresh_token" }],
     });
 
@@ -182,13 +184,10 @@ describe("refresh", () => {
   it("refresh - should return a signed JWT", async () => {
     const mockToken = "some_refresh_token";
 
-    const mockDeviceInput = {
-      identifier: "1",
-      platform: "web",
-      address: "127.0.0.1",
-    };
-
-    const result = await service.refresh(mockDeviceInput, mockToken);
+    const result = await service.refresh(mockToken, {
+      ...mockClientInfo,
+      id: device.id,
+    });
 
     expect(typeof result).toEqual("string");
   });
@@ -208,9 +207,8 @@ describe("logout", () => {
 
     device = new Device({
       user: user.id,
-      identifier: "1",
-      platform: "web",
-      addresses: [{ address: "127.0.0.1" }],
+      hosts: [{ address: mockClientInfo.host }],
+      agents: [mockClientInfo.agent],
       tokens: [{ token: "some_refresh_token" }],
     });
 
@@ -218,31 +216,23 @@ describe("logout", () => {
   });
 
   it("should return success string", async () => {
-    const result = await service.logout(device.id);
+    const result = await service.logout({ ...mockClientInfo, id: device.id });
 
     expect(typeof result).toEqual("string");
   });
 });
+
 const mockUserInput = {
   username: "test_user",
   password: "ab12cd34",
   confirmPassword: "ab12cd34",
 };
 
-const mockDeviceInput = {
-  identifier: "1",
-  platform: "web",
-  address: "127.0.0.1",
-};
-
-const mockDeviceDocument = {
-  id: "1",
-  identifier: "1",
-  platform: "ios",
-  tokens: [],
-  addresses: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
+const mockClientInfo = {
+  id: undefined,
+  agent:
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+  host: "127.0.0.1",
 };
 
 const mockUserDocument = {

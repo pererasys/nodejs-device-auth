@@ -9,7 +9,8 @@ export const AUTH = {
   jwtIssuer: process.env.JWT_ISSUER || "http://localhost:4000",
   jwtSubject: process.env.JWT_SUBJECT || "Device management API",
   jwtExpiration: process.env.JWT_EXPIRATION || "15 minutes",
-  refreshCookie: process.env.REFRESH_COOKIE || "device_token",
+  refreshCookie: process.env.REFRESH_COOKIE || "refresh_token",
+  clientCookie: process.env.CLIENT_COOKIE || "client_id",
 };
 
 export const PORT = process.env.PORT || 4000;

@@ -22,9 +22,8 @@ export class DeviceService {
   static transformDevice(device: IDeviceDocument) {
     return {
       id: device.id,
-      identifier: device.identifier,
-      platform: device.platform,
-      address: device.addresses[device.addresses.length - 1].address,
+      agent: device.agents[device.agents.length - 1],
+      host: device.hosts[device.hosts.length - 1].address,
       loggedIn:
         device.tokens.length > 0
           ? !device.tokens[device.tokens.length - 1].revokedAt
@@ -45,7 +44,7 @@ export class DeviceService {
       });
 
       return devices.map(DeviceService.transformDevice);
-    } catch {
+    } catch (e) {
       throw new ServiceError();
     }
   }
