@@ -74,8 +74,6 @@ export const refresh = async (req: Request, res: Response) => {
 
 export const logout = async (req: IAuthenticatedRequest, res: Response) => {
   try {
-    const { device } = req.body;
-
     const service = new AuthService(settings.AUTH);
 
     const message = await service.logout(req.user.device);

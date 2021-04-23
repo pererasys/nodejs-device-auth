@@ -295,6 +295,7 @@ export class AuthService {
 
       return "Successfully logged out.";
     } catch (e) {
+      console.log(e);
       if (e instanceof ServiceError) throw e;
       else throw new ServiceError();
     }

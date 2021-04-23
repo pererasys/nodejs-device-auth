@@ -176,11 +176,15 @@ describe("logout", () => {
 
     await device.save();
 
-    accessToken = jwt.sign({ id: user.id }, AUTH.jwtKey, {
-      audience: AUTH.jwtAudience,
-      issuer: AUTH.jwtIssuer,
-      subject: AUTH.jwtSubject,
-    });
+    accessToken = jwt.sign(
+      { account: { id: user.id }, device: device.id },
+      AUTH.jwtKey,
+      {
+        audience: AUTH.jwtAudience,
+        issuer: AUTH.jwtIssuer,
+        subject: AUTH.jwtSubject,
+      }
+    );
   });
 
   it("should respond with 200", async () => {

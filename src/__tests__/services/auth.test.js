@@ -218,13 +218,7 @@ describe("logout", () => {
   });
 
   it("should return success string", async () => {
-    const mockDeviceInput = {
-      identifier: "1",
-      platform: "web",
-      address: "127.0.0.1",
-    };
-
-    const result = await service.logout(user.id, mockDeviceInput);
+    const result = await service.logout(device.id);
 
     expect(typeof result).toEqual("string");
   });
