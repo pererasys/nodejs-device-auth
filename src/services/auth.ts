@@ -235,7 +235,6 @@ export class AuthService {
 
             return false;
           } else {
-            console.log("authenticating");
             shouldAuthenticate = true;
 
             const newExp = new Date();
@@ -261,7 +260,6 @@ export class AuthService {
         return await this.signToken(device.user as IUserDocument);
       else throw error;
     } catch (e) {
-      console.log(e);
       if (e instanceof ServiceError) throw e;
       else throw new ServiceError();
     }
