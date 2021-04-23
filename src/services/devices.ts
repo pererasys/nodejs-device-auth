@@ -45,7 +45,6 @@ export class DeviceService {
 
       return devices.map(DeviceService.transformDevice);
     } catch (e) {
-      console.log(e);
       throw new ServiceError();
     }
   }
