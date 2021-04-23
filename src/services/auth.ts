@@ -26,7 +26,13 @@ interface IRegistrationInput extends IUserInput {
 }
 
 export interface IAuthenticatedUser {
-  id: string;
+  account: {
+    id: string;
+    username: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+  device: string;
 }
 
 export class AuthService {
@@ -53,19 +59,6 @@ export class AuthService {
   }
 
   /**
-   * Transforms a user document into an acceptable JSON response
-   * @param {IUserDocument} user
-   */
-  private transformUser(user: IUserDocument) {
-    return {
-      id: user.id,
-      username: user.username,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
-  }
-
-  /**
    * Signs a JWT for the provided user
    * @param {IUserDocument} user
    * @param {IDeviceDocument} device
@@ -74,7 +67,7 @@ export class AuthService {
     new Promise<string>((resolve, reject) => {
       jwt.sign(
         {
-          user: {
+          account: {
             id: user.id,
             username: user.username,
             createdAt: user.createdAt,
