@@ -111,7 +111,7 @@ export class AuthService {
    * Authenticates a user and returns a signed JWT
    * @param {IUserDocument} user
    * @param {string} password
-   * @param {IDeviceInput} device
+   * @param {IClientInfo} client
    */
   private async authenticate(
     user: IUserDocument,
