@@ -12,6 +12,7 @@ import User, { IUserDocument, IUserInput } from "../models/user";
 import Device, { IDeviceDocument, IDeviceInput } from "../models/device";
 
 import { ServiceError, ValidationError } from "./utils";
+import { UserService } from "./users";
 
 interface IAuthConfig {
   jwtKey: string;
@@ -68,11 +69,20 @@ export class AuthService {
   /**
    * Signs a JWT for the provided user
    * @param {IUserDocument} user
+   * @param {IDeviceDocument} device
    */
-  protected signToken = (user: IUserDocument) =>
+  protected signToken = (user: IUserDocument, device: IDeviceDocument) =>
     new Promise<string>((resolve, reject) => {
       jwt.sign(
-        { id: user.id },
+        {
+          user: {
+            id: user.id,
+            username: user.username,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+          },
+          device: device.id,
+        },
         this.config.jwtKey,
         {
           expiresIn: this.config.jwtExpiration,
@@ -109,17 +119,6 @@ export class AuthService {
   }
 
   /**
-   * Returns a signed JWT and a device's refresh token
-   * @param {IUserDocument} user
-   */
-  private async getCredentials(user: IUserDocument) {
-    return {
-      refreshToken: uid(256),
-      accessToken: await this.signToken(user),
-    };
-  }
-
-  /**
    * Authenticates a user and returns a signed JWT
    * @param {IUserDocument} user
    * @param {string} password
@@ -131,7 +130,7 @@ export class AuthService {
     device: IDeviceInput
   ) {
     if (await bcrypt.compare(password, user.password)) {
-      return this.authenticationSuccess(user, device);
+      return await this.getCredentials(user, device);
     } else this.throwDefaultAuthenticationError();
   }
 
@@ -140,12 +139,7 @@ export class AuthService {
    * @param {IUserDocument} user
    * @param {IDeviceInput} device
    */
-  private async authenticationSuccess(
-    user: IUserDocument,
-    device: IDeviceInput
-  ) {
-    const credentials = await this.getCredentials(user);
-
+  private async getCredentials(user: IUserDocument, device: IDeviceInput) {
     let rDevice = await this.deviceModel.findOne({
       identifier: device.identifier,
       user: user.id,
@@ -169,11 +163,16 @@ export class AuthService {
     )
       rDevice.addresses.push({ address: device.address });
 
-    rDevice.tokens.push({ token: credentials.refreshToken });
+    const token = uid(256);
+
+    rDevice.tokens.push({ token });
 
     await rDevice.save();
 
-    return credentials;
+    return {
+      accessToken: await this.signToken(user, rDevice),
+      refreshToken: token,
+    };
   }
 
   /**
@@ -192,10 +191,7 @@ export class AuthService {
 
       await user.save();
 
-      return {
-        user: this.transformUser(user),
-        credentials: await this.authenticationSuccess(user, device),
-      };
+      return await this.getCredentials(user, device);
     } catch (e) {
       if (e instanceof ServiceError) throw e;
       else if (e.code === 11000 && typeof e.keyValue.username !== "undefined") {
@@ -215,10 +211,7 @@ export class AuthService {
 
       const user = await this.userModel.findOne({ username });
 
-      return {
-        user: this.transformUser(user),
-        credentials: await this.authenticate(user, password, device),
-      };
+      return await this.authenticate(user, password, device);
     } catch (e) {
       if (e instanceof ServiceError) throw e;
       else this.throwDefaultAuthenticationError();
