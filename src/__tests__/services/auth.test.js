@@ -32,6 +32,7 @@ const mockConfig = {
   jwtSubject: "the subject",
   jwtExpiration: "10 minutes",
   refreshCookie: "refresh_token",
+  clientCookie: "client_id",
 };
 
 const service = new AuthService(mockConfig);
