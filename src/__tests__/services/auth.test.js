@@ -50,7 +50,8 @@ test("signToken - should properly sign a JWT", async () => {
 
   const decoded = decodeJWT(token);
 
-  expect(decoded.user.id).toEqual(mockUserDocument.id);
+  expect(decoded.account.id).toEqual(mockUserDocument.id);
+  expect(decoded.account.username).toEqual(mockUserDocument.username);
   expect(decoded.device).toEqual(mockDeviceDocument.id);
   expect(decoded.iss).toEqual(mockConfig.jwtIssuer);
   expect(decoded.sub).toEqual(mockConfig.jwtSubject);
