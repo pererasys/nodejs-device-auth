@@ -36,7 +36,7 @@ export const register = async (req: Request, res: Response) => {
       address: req.headers.forwarded || req.connection.remoteAddress,
     };
 
-    let result = await service.register(user, device);
+    const result = await service.register(user, device);
 
     if (device.platform === "web") {
       setRefreshCookie(result.refreshToken, res);
@@ -56,7 +56,7 @@ export const login = async (req: Request, res: Response) => {
 
     const service = new AuthService(settings.AUTH);
 
-    let result = await service.login(
+    const result = await service.login(
       { username, password },
       {
         ...device,
