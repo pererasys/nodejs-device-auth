@@ -2,7 +2,7 @@
 
 A NodeJS REST API with basic device management functionality and a persistent authentication strategy using refreshable JSON web tokens.
 
-![Device Management](https://github.com/pererasys/nodejs-device-auth/tree/1-setup/docs/diagram.png?raw=true)
+![Device Management](https://github.com/pererasys/nodejs-device-auth/blob/1-setup/docs/diagram.png?raw=true)
 
 ## Setup
 
