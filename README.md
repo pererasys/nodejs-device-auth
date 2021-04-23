@@ -10,7 +10,7 @@ In this project, we will be using a refreshable JWT to maintain authentication a
 
 Each device has a unique set of refresh tokens, which may only be used in conjunction with said device. These tokens have a set expiration date, which can be extended when access tokens are refreshed, and will be revoked if used after this date. Similarly, all refresh tokens associated with a device are revoked when a user logs out.
 
-![Authentication flow](https://github.com/pererasys/nodejs-device-auth/blob/3-login/register/docs/diagram.png?raw=true)
+![Authentication flow](https://github.com/pererasys/nodejs-device-auth/blob/3-login/register/docs/auth-flow.png?raw=true)
 
 ## Setup
 
