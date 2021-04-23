@@ -13,7 +13,7 @@ export const me = async (req: IAuthenticatedRequest, res: Response) => {
   try {
     const service = new UserService();
 
-    const result = await service.getByID(req.user.id);
+    const result = await service.getByID(req.user.account.id);
 
     return res.status(200).json(result);
   } catch (e) {
@@ -26,7 +26,7 @@ export const devices = async (req: IAuthenticatedRequest, res: Response) => {
   try {
     const service = new DeviceService();
 
-    const result = await service.getByUser(req.user.id);
+    const result = await service.getByUser(req.user.account.id);
 
     return res.status(200).json(result);
   } catch (e) {
