@@ -32,18 +32,10 @@ describe("login", () => {
   afterEach(async () => await clearDatabase());
 
   it("should respond with 200", async () => {
-    const body = {
-      ...mockUser,
-      device: {
-        identifier: "1",
-        platform: "web",
-      },
-    };
-
     const res = await request(app)
       .post("/auth/login")
       .set("Content-Type", "application/json")
-      .send(body);
+      .send(mockUser);
 
     expect(res.statusCode).toEqual(200);
   });
@@ -52,10 +44,6 @@ describe("login", () => {
     const body = {
       ...mockUser,
       password: "wrong_password",
-      device: {
-        identifier: "1",
-        platform: "web",
-      },
     };
 
     const res = await request(app)
@@ -72,14 +60,8 @@ describe("register", () => {
 
   it("should respond with 201", async () => {
     const body = {
-      user: {
-        ...mockUser,
-        confirmPassword: mockUser.password,
-      },
-      device: {
-        identifier: "1",
-        platform: "web",
-      },
+      ...mockUser,
+      confirmPassword: mockUser.password,
     };
 
     const res = await request(app)

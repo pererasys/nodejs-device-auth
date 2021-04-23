@@ -64,7 +64,7 @@ export class AuthService {
    * @param {IUserDocument} user
    * @param {IDeviceDocument} device
    */
-  protected signToken = (user: IUserDocument, device: IDeviceDocument) =>
+  protected signToken = (user: IUserDocument) =>
     new Promise<string>((resolve, reject) => {
       jwt.sign(
         {
@@ -159,7 +159,7 @@ export class AuthService {
 
     return {
       clientID: device.id,
-      accessToken: await this.signToken(user, device),
+      accessToken: await this.signToken(user),
       refreshToken: token,
     };
   }
