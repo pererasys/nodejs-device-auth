@@ -36,23 +36,14 @@ export const register = async (req: Request, res: Response) => {
       address: req.headers.forwarded || req.connection.remoteAddress,
     };
 
-    const result = await service.register(user, device);
-
-    let response = result;
+    let result = await service.register(user, device);
 
     if (device.platform === "web") {
-      setRefreshCookie(result.credentials.refreshToken, res);
-
-      response = {
-        ...result,
-        credentials: {
-          ...result.credentials,
-          refreshToken: "",
-        },
-      };
+      setRefreshCookie(result.refreshToken, res);
+      result.refreshToken = "";
     }
 
-    return res.status(201).json(response);
+    return res.status(201).json(result);
   } catch (e) {
     if (e instanceof ServiceError) return res.status(e.status).json(e);
     return res.status(500).json(new ServiceError());
@@ -65,7 +56,7 @@ export const login = async (req: Request, res: Response) => {
 
     const service = new AuthService(settings.AUTH);
 
-    const result = await service.login(
+    let result = await service.login(
       { username, password },
       {
         ...device,
@@ -73,21 +64,12 @@ export const login = async (req: Request, res: Response) => {
       }
     );
 
-    let response = result;
-
     if (device.platform === "web") {
-      setRefreshCookie(result.credentials.refreshToken, res);
-
-      response = {
-        ...result,
-        credentials: {
-          ...result.credentials,
-          refreshToken: "",
-        },
-      };
+      setRefreshCookie(result.refreshToken, res);
+      result.refreshToken = "";
     }
 
-    return res.status(200).json(response);
+    return res.status(200).json(result);
   } catch (e) {
     if (e instanceof ServiceError) return res.status(e.status).json(e);
     return res.status(500).json(new ServiceError());
@@ -117,14 +99,9 @@ export const refresh = async (req: Request, res: Response) => {
 
 export const logout = async (req: IAuthenticatedRequest, res: Response) => {
   try {
-    const { device } = req.body;
-
     const service = new AuthService(settings.AUTH);
 
-    const message = await service.logout(req.user.id, {
-      ...device,
-      address: req.headers.forwarded || req.connection.remoteAddress,
-    });
+    const message = await service.logout(req.user.device);
 
     return res.status(200).json({ message });
   } catch (e) {

@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uid } from "rand-token";
 
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 
 import User, { IUserDocument, IUserInput } from "../models/user";
 import Device, { IDeviceDocument, IDeviceInput } from "../models/device";
@@ -30,7 +30,13 @@ interface IRegistrationInput extends IUserInput {
 }
 
 export interface IAuthenticatedUser {
-  id: string;
+  account: {
+    id: string;
+    username: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+  device: string;
 }
 
 export class AuthService {
@@ -59,11 +65,15 @@ export class AuthService {
   /**
    * Signs a JWT for the provided user
    * @param {IUserDocument} user
+   * @param {IDeviceDocument} device
    */
-  protected signToken = (user: IUserDocument) =>
+  protected signToken = (user: IUserDocument, device: IDeviceDocument) =>
     new Promise<string>((resolve, reject) => {
       jwt.sign(
-        { id: user.id },
+        {
+          account: UserService.transformUser(user),
+          device: device.id,
+        },
         this.config.jwtKey,
         {
           expiresIn: this.config.jwtExpiration,
@@ -100,17 +110,6 @@ export class AuthService {
   }
 
   /**
-   * Returns a signed JWT and a device's refresh token
-   * @param {IUserDocument} user
-   */
-  private async getCredentials(user: IUserDocument) {
-    return {
-      refreshToken: uid(256),
-      accessToken: await this.signToken(user),
-    };
-  }
-
-  /**
    * Authenticates a user and returns a signed JWT
    * @param {IUserDocument} user
    * @param {string} password
@@ -122,7 +121,7 @@ export class AuthService {
     device: IDeviceInput
   ) {
     if (await bcrypt.compare(password, user.password)) {
-      return this.authenticationSuccess(user, device);
+      return await this.getCredentials(user, device);
     } else this.throwDefaultAuthenticationError();
   }
 
@@ -131,12 +130,7 @@ export class AuthService {
    * @param {IUserDocument} user
    * @param {IDeviceInput} device
    */
-  private async authenticationSuccess(
-    user: IUserDocument,
-    device: IDeviceInput
-  ) {
-    const credentials = await this.getCredentials(user);
-
+  private async getCredentials(user: IUserDocument, device: IDeviceInput) {
     let rDevice = await this.deviceModel.findOne({
       identifier: device.identifier,
       user: user.id,
@@ -160,11 +154,16 @@ export class AuthService {
     )
       rDevice.addresses.push({ address: device.address });
 
-    rDevice.tokens.push({ token: credentials.refreshToken });
+    const token = uid(256);
+
+    rDevice.tokens.push({ token });
 
     await rDevice.save();
 
-    return credentials;
+    return {
+      accessToken: await this.signToken(user, rDevice),
+      refreshToken: token,
+    };
   }
 
   /**
@@ -183,10 +182,7 @@ export class AuthService {
 
       await user.save();
 
-      return {
-        user: UserService.transformUser(user),
-        credentials: await this.authenticationSuccess(user, device),
-      };
+      return await this.getCredentials(user, device);
     } catch (e) {
       if (e instanceof ServiceError) throw e;
       else if (e.code === 11000 && typeof e.keyValue.username !== "undefined") {
@@ -206,10 +202,7 @@ export class AuthService {
 
       const user = await this.userModel.findOne({ username });
 
-      return {
-        user: UserService.transformUser(user),
-        credentials: await this.authenticate(user, password, device),
-      };
+      return await this.authenticate(user, password, device);
     } catch (e) {
       if (e instanceof ServiceError) throw e;
       else this.throwDefaultAuthenticationError();
@@ -274,7 +267,7 @@ export class AuthService {
       if (shouldSaveDevice) await rDevice.save();
 
       if (shouldAuthenticate)
-        return await this.signToken(rDevice.user as IUserDocument);
+        return await this.signToken(rDevice.user as IUserDocument, rDevice);
       else throw error;
     } catch (e) {
       if (e instanceof ServiceError) throw e;
@@ -284,27 +277,26 @@ export class AuthService {
 
   /**
    * Logs out a user
-   * @param {string} user
-   * @param {IDeviceInput} device
+   * @param {string} device
    */
-  async logout(user: string, device: IDeviceInput) {
+  async logout(device: string) {
     try {
-      const rDevice = await this.deviceModel.findOne({
-        user: new Types.ObjectId(user),
-        identifier: device.identifier,
+      const rDevice = await this.deviceModel.findById(device);
+
+      const activeTokens = rDevice.tokens.filter(
+        (t) => typeof t.revokedAt === "undefined"
+      );
+
+      activeTokens.forEach((t) => {
+        t.revokedAt = new Date();
+        t.revokedReason = "logout";
       });
-
-      if (!rDevice) throw new ServiceError();
-
-      const activeToken = rDevice.tokens[rDevice.tokens.length - 1];
-
-      activeToken.revokedAt = new Date();
-      activeToken.revokedReason = "logout";
 
       await rDevice.save();
 
       return "Successfully logged out.";
     } catch (e) {
+      console.log(e);
       if (e instanceof ServiceError) throw e;
       else throw new ServiceError();
     }

@@ -29,7 +29,7 @@ describe("me", () => {
     const user = new User(mockUser);
     await user.save();
 
-    accessToken = jwt.sign({ id: user.id }, AUTH.jwtKey, {
+    accessToken = jwt.sign({ account: { id: user.id } }, AUTH.jwtKey, {
       audience: AUTH.jwtAudience,
       issuer: AUTH.jwtIssuer,
       subject: AUTH.jwtSubject,
@@ -73,7 +73,7 @@ describe("devices", () => {
 
     await device.save();
 
-    accessToken = jwt.sign({ id: user.id }, AUTH.jwtKey, {
+    accessToken = jwt.sign({ account: { id: user.id } }, AUTH.jwtKey, {
       audience: AUTH.jwtAudience,
       issuer: AUTH.jwtIssuer,
       subject: AUTH.jwtSubject,
