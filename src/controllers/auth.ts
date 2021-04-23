@@ -3,45 +3,19 @@
  * Copyright (c) 2021
  */
 
-import { Request, Response } from "express";
-import { IAuthenticatedRequest } from "src/middleware";
+import { Response } from "express";
 
 import { AuthService, ServiceError } from "../services";
 
 import * as settings from "../settings";
 
-const setRefreshCookie = (token: string, res: Response) => {
-  const tokenExpiration = new Date();
-  tokenExpiration.setDate(
-    tokenExpiration.getDate() + settings.AUTH.refreshExpiration
-  );
+import { IAuthenticatedRequest, IRequest } from "../middleware";
 
-  res.cookie(settings.AUTH.refreshCookie, token, {
-    expires: tokenExpiration,
-    httpOnly: true,
-    path: "/",
-    signed: true,
-    secure: settings.HTTPS_ONLY,
-  });
-};
-
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: IRequest, res: Response) => {
   try {
     const service = new AuthService(settings.AUTH);
 
-    const user = req.body.user;
-
-    const device = {
-      ...req.body.device,
-      address: req.headers.forwarded || req.connection.remoteAddress,
-    };
-
-    const result = await service.register(user, device);
-
-    if (device.platform === "web") {
-      setRefreshCookie(result.refreshToken, res);
-      result.refreshToken = "";
-    }
+    const result = await service.register(req.body, req.client);
 
     return res.status(201).json(result);
   } catch (e) {
@@ -50,24 +24,11 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: IRequest, res: Response) => {
   try {
-    const { username, password, device } = req.body;
-
     const service = new AuthService(settings.AUTH);
 
-    const result = await service.login(
-      { username, password },
-      {
-        ...device,
-        address: req.headers.forwarded || req.connection.remoteAddress,
-      }
-    );
-
-    if (device.platform === "web") {
-      setRefreshCookie(result.refreshToken, res);
-      result.refreshToken = "";
-    }
+    const result = await service.login(req.body, req.client);
 
     return res.status(200).json(result);
   } catch (e) {
@@ -76,18 +37,13 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const refresh = async (req: Request, res: Response) => {
+export const refresh = async (req: IRequest, res: Response) => {
   try {
-    const { token, device } = req.body;
-
     const service = new AuthService(settings.AUTH);
 
     const accessToken = await service.refresh(
-      {
-        ...device,
-        address: req.headers.forwarded || req.connection.remoteAddress,
-      },
-      token
+      req.query[settings.AUTH.refreshCookie] as string,
+      req.client
     );
 
     return res.status(200).json({ accessToken });
@@ -101,7 +57,7 @@ export const logout = async (req: IAuthenticatedRequest, res: Response) => {
   try {
     const service = new AuthService(settings.AUTH);
 
-    const message = await service.logout(req.user.device);
+    const message = await service.logout(req.client);
 
     return res.status(200).json({ message });
   } catch (e) {

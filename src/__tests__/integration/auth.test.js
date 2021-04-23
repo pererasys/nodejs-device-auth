@@ -36,18 +36,10 @@ describe("login", () => {
   afterEach(async () => await clearDatabase());
 
   it("should respond with 200", async () => {
-    const body = {
-      ...mockUser,
-      device: {
-        identifier: "1",
-        platform: "web",
-      },
-    };
-
     const res = await request(app)
       .post("/auth/login")
       .set("Content-Type", "application/json")
-      .send(body);
+      .send(mockUser);
 
     expect(res.statusCode).toEqual(200);
   });
@@ -56,10 +48,6 @@ describe("login", () => {
     const body = {
       ...mockUser,
       password: "wrong_password",
-      device: {
-        identifier: "1",
-        platform: "web",
-      },
     };
 
     const res = await request(app)
@@ -76,14 +64,8 @@ describe("register", () => {
 
   it("should respond with 201", async () => {
     const body = {
-      user: {
-        ...mockUser,
-        confirmPassword: mockUser.password,
-      },
-      device: {
-        identifier: "1",
-        platform: "web",
-      },
+      ...mockUser,
+      confirmPassword: mockUser.password,
     };
 
     const res = await request(app)
@@ -96,6 +78,9 @@ describe("register", () => {
 });
 
 describe("refresh", () => {
+  let user;
+  let device;
+
   beforeEach(async () => {
     user = new User({
       username: "test_user",
@@ -106,9 +91,8 @@ describe("refresh", () => {
 
     device = new Device({
       user: user.id,
-      identifier: "1",
-      platform: "web",
-      addresses: [{ address: "127.0.0.1" }],
+      agents: [mockClientInfo.agent],
+      hosts: [{ address: mockClientInfo.host }],
       tokens: [{ token: "some_refresh_token" }],
     });
 
@@ -118,36 +102,24 @@ describe("refresh", () => {
   afterEach(async () => await clearDatabase());
 
   it("should respond with 200", async () => {
-    const body = {
-      token: "some_refresh_token",
-      device: {
-        identifier: "1",
-        platform: "web",
-      },
-    };
-
     const res = await request(app)
-      .post("/auth/refresh")
+      .post(
+        `/auth/refresh?${AUTH.refreshCookie}=some_refresh_token&${AUTH.clientCookie}=${device.id}`
+      )
       .set("Content-Type", "application/json")
-      .send(body);
+      .set("User-Agent", mockClientInfo.agent);
 
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty("accessToken");
   });
 
   it("should respond with 403", async () => {
-    const body = {
-      token: "wrong_token",
-      device: {
-        identifier: "1",
-        platform: "web",
-      },
-    };
-
     const res = await request(app)
-      .post("/auth/refresh")
+      .post(
+        `/auth/refresh?${AUTH.refreshCookie}=wrong_token&${AUTH.clientCookie}=${device.id}`
+      )
       .set("Content-Type", "application/json")
-      .send(body);
+      .set("User-Agent", mockClientInfo.agent);
 
     expect(res.statusCode).toEqual(403);
   });
@@ -168,57 +140,35 @@ describe("logout", () => {
 
     device = new Device({
       user: user.id,
-      identifier: "1",
-      platform: "web",
-      addresses: [{ address: "127.0.0.1" }],
-      tokens: [{ token: "some_refresh_token" }],
+      agents: [mockClientInfo.agent],
+      hosts: [{ address: mockClientInfo.host }],
     });
 
     await device.save();
 
-    accessToken = jwt.sign(
-      { account: { id: user.id }, device: device.id },
-      AUTH.jwtKey,
-      {
-        audience: AUTH.jwtAudience,
-        issuer: AUTH.jwtIssuer,
-        subject: AUTH.jwtSubject,
-      }
-    );
+    accessToken = jwt.sign({ account: { id: user.id } }, AUTH.jwtKey, {
+      audience: AUTH.jwtAudience,
+      issuer: AUTH.jwtIssuer,
+      subject: AUTH.jwtSubject,
+    });
   });
 
   it("should respond with 200", async () => {
-    const body = {
-      device: {
-        identifier: "1",
-        platform: "web",
-      },
-    };
-
     const res = await request(app)
-      .post("/auth/logout")
+      .post(`/auth/logout?${AUTH.clientCookie}=${device.id}`)
       .set({
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
-      })
-      .send(body);
+      });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty("message");
   });
 
   it("should respond with 403", async () => {
-    const body = {
-      device: {
-        identifier: "1",
-        platform: "web",
-      },
-    };
-
     const res = await request(app)
-      .post("/auth/logout")
-      .set("Content-Type", "application/json")
-      .send(body);
+      .post(`/auth/logout?${AUTH.clientCookie}=${device.id}`)
+      .set("Content-Type", "application/json");
 
     expect(res.statusCode).toEqual(403);
   });
@@ -227,4 +177,11 @@ describe("logout", () => {
 const mockUser = {
   username: "test_user",
   password: "ab12cd34",
+};
+
+const mockClientInfo = {
+  id: undefined,
+  agent:
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+  host: "127.0.0.1",
 };

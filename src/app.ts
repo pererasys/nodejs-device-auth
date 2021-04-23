@@ -13,7 +13,7 @@ import User from "./models/user";
 import { ServiceError } from "./services";
 
 import * as routes from "./routes";
-import { authErrors } from "./middleware";
+import { authErrors, clientInfo } from "./middleware";
 
 import * as settings from "./settings";
 
@@ -25,6 +25,8 @@ export const buildApp = () => {
   app.use(bodyParser.json());
 
   app.use(cookieParser(settings.COOKIE_SECRET));
+
+  app.use(clientInfo);
 
   app.use(
     expressJwt({

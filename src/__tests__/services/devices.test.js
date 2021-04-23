@@ -1,5 +1,3 @@
-const { Types } = require("mongoose");
-
 const {
   buildDatabase,
   clearDatabase,
@@ -46,9 +44,8 @@ describe("getByUser", () => {
 
     result.forEach((device) => {
       expect(device).toHaveProperty("id");
-      expect(device).toHaveProperty("identifier");
-      expect(device).toHaveProperty("platform");
-      expect(device).toHaveProperty("address");
+      expect(device).toHaveProperty("agent");
+      expect(device).toHaveProperty("host");
       expect(device).toHaveProperty("loggedIn");
       expect(device).toHaveProperty("createdAt");
       expect(device).toHaveProperty("updatedAt");
@@ -57,7 +54,8 @@ describe("getByUser", () => {
 });
 
 const mockDevice = {
-  identifier: "1",
-  platform: "web",
-  addresses: [{ address: "127.0.0.1" }],
+  agents: [
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+  ],
+  hosts: [{ address: "127.0.0.1" }],
 };
