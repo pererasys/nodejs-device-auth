@@ -29,7 +29,13 @@ interface IRegistrationInput extends IUserInput {
 }
 
 export interface IAuthenticatedUser {
-  id: string;
+  account: {
+    id: string;
+    username: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+  device: string;
 }
 
 export class AuthService {
@@ -64,7 +70,7 @@ export class AuthService {
     new Promise<string>((resolve, reject) => {
       jwt.sign(
         {
-          user: UserService.transformUser(user),
+          account: UserService.transformUser(user),
           device: device.id,
         },
         this.config.jwtKey,
