@@ -12,7 +12,6 @@ import User, { IUserDocument, IUserInput } from "../models/user";
 import Device, { IDeviceDocument, IDeviceInput } from "../models/device";
 
 import { ServiceError, ValidationError } from "./utils";
-import { UserService } from "./users";
 
 interface IAuthConfig {
   jwtKey: string;
