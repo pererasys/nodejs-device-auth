@@ -159,7 +159,7 @@ export class AuthService {
     return {
       clientId: device.id,
       accessToken: await this.signToken(user),
-      refreshToken: token.token,
+      refreshToken: token.key,
     };
   }
 

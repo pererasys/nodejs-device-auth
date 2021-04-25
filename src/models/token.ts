@@ -9,7 +9,7 @@ import { uid } from "rand-token";
 export interface IRefreshToken {
   user: Schema.Types.ObjectId;
   device: Schema.Types.ObjectId;
-  token: string;
+  key: string;
   revokedReason: "logout" | "expired";
   revokedAt: Date;
   expiresAt: Date;
@@ -33,7 +33,7 @@ const RefreshTokenSchema = new Schema(
       ref: "Device",
       required: true,
     },
-    token: {
+    key: {
       type: String,
       default: () => uid(256),
     },
