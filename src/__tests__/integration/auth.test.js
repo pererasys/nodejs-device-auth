@@ -12,6 +12,7 @@ const { buildApp } = require("../../app");
 
 const { default: User } = require("../../models/user");
 const { default: Device } = require("../../models/device");
+const { default: Session } = require("../../models/session");
 
 const { AUTH } = require("../../settings");
 
@@ -39,6 +40,7 @@ describe("login", () => {
     const res = await request(app)
       .post("/auth/login")
       .set("Content-Type", "application/json")
+      .set("User-Agent", mockClientInfo.agent)
       .send(mockUser);
 
     expect(res.statusCode).toEqual(200);
@@ -53,6 +55,7 @@ describe("login", () => {
     const res = await request(app)
       .post("/auth/login")
       .set("Content-Type", "application/json")
+      .set("User-Agent", mockClientInfo.agent)
       .send(body);
 
     expect(res.statusCode).toEqual(400);
@@ -71,6 +74,7 @@ describe("register", () => {
     const res = await request(app)
       .post("/auth/register")
       .set("Content-Type", "application/json")
+      .set("User-Agent", mockClientInfo.agent)
       .send(body);
 
     expect(res.statusCode).toEqual(201);
@@ -80,6 +84,7 @@ describe("register", () => {
 describe("refresh", () => {
   let user;
   let device;
+  let session;
 
   beforeEach(async () => {
     user = new User({
@@ -89,14 +94,19 @@ describe("refresh", () => {
 
     await user.save();
 
-    device = new Device({
-      user: user.id,
-      agents: [mockClientInfo.agent],
-      hosts: [{ address: mockClientInfo.host }],
-      tokens: [{ token: "some_refresh_token" }],
-    });
+    device = new Device();
 
     await device.save();
+
+    session = new Session({
+      device: device.id,
+      user: user.id,
+      hosts: [{ address: mockClientInfo.host }],
+      agents: [{ raw: mockClientInfo.agent }],
+      token: "some_refresh_token",
+    });
+
+    await session.save();
   });
 
   afterEach(async () => await clearDatabase());
