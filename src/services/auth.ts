@@ -9,7 +9,7 @@ import { Model } from "mongoose";
 
 import User, { IUserDocument, IUserInput } from "../models/user";
 import Device, { IDeviceDocument } from "../models/device";
-import RefreshToken, { IRefreshTokenDocument } from "../models/token";
+import Session, { ISessionDocument } from "../models/session";
 
 import { ServiceError, ValidationError } from "./utils";
 
@@ -41,14 +41,14 @@ export class AuthService {
 
   deviceModel: Model<IDeviceDocument>;
   userModel: Model<IUserDocument>;
-  tokenModel: Model<IRefreshTokenDocument>;
+  sessionModel: Model<ISessionDocument>;
 
   constructor(config: IAuthConfig) {
     this.config = config;
 
     this.userModel = User;
     this.deviceModel = Device;
-    this.tokenModel = RefreshToken;
+    this.sessionModel = Session;
   }
 
   /**
@@ -66,7 +66,7 @@ export class AuthService {
    * @param {IUserDocument} user
    * @param {IDeviceDocument} device
    */
-  protected signToken = (user: IUserDocument) =>
+  private signToken = (user: IUserDocument) =>
     new Promise<string>((resolve, reject) => {
       jwt.sign(
         {
@@ -136,30 +136,25 @@ export class AuthService {
   private async getCredentials(user: IUserDocument, client: IClientInfo) {
     let device: IDeviceDocument;
 
-    if (client.id) {
-      device = await this.deviceModel.findById(client.id);
+    if (client.id) device = await this.deviceModel.findById(client.id);
+    else device = new this.deviceModel();
 
-      if (device.agents[device.agents.length - 1] !== client.agent)
-        device.agents.push(client.agent);
-
-      if (device.hosts[device.hosts.length - 1].address !== client.host)
-        device.hosts.push({ address: client.host });
-    } else {
-      device = new this.deviceModel({
-        agents: [client.agent],
-        hosts: [{ address: client.host }],
-      });
-    }
-
-    const token = new this.tokenModel({ user: user.id, device: device.id });
+    const session = new this.sessionModel({
+      user: user.id,
+      device: device.id,
+      agents: [{ raw: client.agent }],
+      hosts: [{ address: client.host }],
+    });
 
     await device.save();
-    await token.save();
+    await session.save();
+
+    console.log(device, session);
 
     return {
       clientId: device.id,
       accessToken: await this.signToken(user),
-      refreshToken: token.key,
+      refreshToken: session.token,
     };
   }
 
