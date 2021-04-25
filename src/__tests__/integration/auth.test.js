@@ -12,6 +12,7 @@ const { buildApp } = require("../../app");
 
 const { default: User } = require("../../models/user");
 const { default: Device } = require("../../models/device");
+const { default: Session } = require("../../models/session");
 
 const { AUTH } = require("../../settings");
 
@@ -83,6 +84,7 @@ describe("register", () => {
 describe("refresh", () => {
   let user;
   let device;
+  let session;
 
   beforeEach(async () => {
     user = new User({
@@ -92,14 +94,19 @@ describe("refresh", () => {
 
     await user.save();
 
-    device = new Device({
-      user: user.id,
-      agents: [mockClientInfo.agent],
-      hosts: [{ address: mockClientInfo.host }],
-      tokens: [{ token: "some_refresh_token" }],
-    });
+    device = new Device();
 
     await device.save();
+
+    session = new Session({
+      device: device.id,
+      user: user.id,
+      hosts: [{ address: mockClientInfo.host }],
+      agents: [{ raw: mockClientInfo.agent }],
+      token: "some_refresh_token",
+    });
+
+    await session.save();
   });
 
   afterEach(async () => await clearDatabase());

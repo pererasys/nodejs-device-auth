@@ -231,7 +231,7 @@ export class AuthService {
           session.hosts.push({ address: client.host });
 
         if (session.agents[session.agents.length - 1].raw !== client.agent)
-          session.agents.push(client.agent);
+          session.agents.push({ raw: client.agent });
 
         await session.save();
       }
@@ -255,13 +255,10 @@ export class AuthService {
       const sessions = await this.sessionModel.find({
         device: client.id,
         user,
+        revokedAt: { $exists: false },
       });
 
-      const activeSessions = sessions.filter(
-        (s) => typeof s.revokedAt === "undefined"
-      );
-
-      activeSessions.forEach(async (s) => {
+      sessions.forEach(async (s) => {
         s.revokedAt = new Date();
         s.revokedReason = "logout";
 

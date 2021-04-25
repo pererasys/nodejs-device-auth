@@ -9,6 +9,7 @@ const {
 
 const { default: User } = require("../../models/user");
 const { default: Device } = require("../../models/device");
+const { default: Session } = require("../../models/session");
 const {
   AuthService,
   ServiceError,
@@ -108,6 +109,8 @@ describe("getCredentials", () => {
     await user.save();
   });
 
+  afterEach(async () => await clearDatabase());
+
   it("should retreive credentials", async () => {
     const result = await service.getCredentials(user, mockClientInfo);
 
@@ -142,6 +145,8 @@ describe("login", () => {
     await user.save();
   });
 
+  afterEach(async () => await clearDatabase());
+
   it("login - should authenticate a user", async () => {
     const mockUserInput = {
       username: "test_user",
@@ -162,6 +167,7 @@ describe("login", () => {
 describe("refresh", () => {
   let user;
   let device;
+  let session;
 
   beforeEach(async () => {
     user = new User({
@@ -171,15 +177,22 @@ describe("refresh", () => {
 
     await user.save();
 
-    device = new Device({
-      user: user.id,
-      hosts: [{ address: mockClientInfo.host }],
-      agents: [mockClientInfo.agent],
-      tokens: [{ token: "some_refresh_token" }],
-    });
+    device = new Device();
 
     await device.save();
+
+    session = new Session({
+      device: device.id,
+      user: user.id,
+      hosts: [{ address: mockClientInfo.host }],
+      agents: [{ raw: mockClientInfo.agent }],
+      token: "some_refresh_token",
+    });
+
+    await session.save();
   });
+
+  afterEach(async () => await clearDatabase());
 
   it("refresh - should return a signed JWT", async () => {
     const mockToken = "some_refresh_token";
@@ -196,6 +209,7 @@ describe("refresh", () => {
 describe("logout", () => {
   let user;
   let device;
+  let session;
 
   beforeEach(async () => {
     user = new User({
@@ -205,18 +219,28 @@ describe("logout", () => {
 
     await user.save();
 
-    device = new Device({
-      user: user.id,
-      hosts: [{ address: mockClientInfo.host }],
-      agents: [mockClientInfo.agent],
-      tokens: [{ token: "some_refresh_token" }],
-    });
+    device = new Device();
 
     await device.save();
+
+    session = new Session({
+      device: device.id,
+      user: user.id,
+      hosts: [{ address: mockClientInfo.host }],
+      agents: [{ raw: mockClientInfo.agent }],
+      token: "some_refresh_token",
+    });
+
+    await session.save();
   });
 
+  afterEach(async () => await clearDatabase());
+
   it("should return success string", async () => {
-    const result = await service.logout({ ...mockClientInfo, id: device.id });
+    const result = await service.logout(user.id, {
+      ...mockClientInfo,
+      id: device.id,
+    });
 
     expect(typeof result).toEqual("string");
   });
