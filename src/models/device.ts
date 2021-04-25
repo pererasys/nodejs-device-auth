@@ -5,17 +5,6 @@
 
 import mongoose, { Schema, Model, Document, Types } from "mongoose";
 
-import { IUserDocument } from "./user";
-
-export interface IRefreshToken {
-  token: string;
-  revokedReason: "logout" | "expired";
-  revokedAt: Date;
-  expiresAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export interface IIPAddress {
   address: string;
   createdAt: Date;
@@ -23,17 +12,13 @@ export interface IIPAddress {
 }
 
 export interface IDevice {
-  user: Types.ObjectId | IUserDocument;
   agents: Types.Array<string>;
   hosts: Types.Array<IIPAddressDocument>;
-  tokens: Types.Array<IRefreshTokenDocument>;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IDeviceDocument extends IDevice, Document {}
-
-export interface IRefreshTokenDocument extends IRefreshToken, Document {}
 
 export interface IIPAddressDocument extends IIPAddress, Document {}
 
@@ -49,43 +34,13 @@ const IPAddressSchema = new Schema(
   { timestamps: true }
 );
 
-const RefreshTokenSchema = new Schema(
-  {
-    token: {
-      type: String,
-      required: true,
-    },
-    expiresAt: {
-      type: Date,
-      required: true,
-      default: () => {
-        const date = new Date();
-        date.setDate(date.getDate() + 30);
-        return date;
-      },
-    },
-    revokedAt: Date,
-    revokedReason: {
-      type: String,
-      enum: ["logout", "expired"],
-    },
-  },
-  { timestamps: true }
-);
-
 const DeviceSchema = new Schema(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     agents: {
       type: [String],
       required: true,
     },
     hosts: { type: [IPAddressSchema], required: true },
-    tokens: { type: [RefreshTokenSchema], default: [] },
   },
   { timestamps: true, collection: "devices" }
 );

@@ -5,11 +5,11 @@
 
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { uid } from "rand-token";
 import { Model } from "mongoose";
 
 import User, { IUserDocument, IUserInput } from "../models/user";
 import Device, { IDeviceDocument } from "../models/device";
+import RefreshToken, { IRefreshTokenDocument } from "../models/token";
 
 import { UserService } from "./users";
 
@@ -43,12 +43,14 @@ export class AuthService {
 
   deviceModel: Model<IDeviceDocument>;
   userModel: Model<IUserDocument>;
+  tokenModel: Model<IRefreshTokenDocument>;
 
   constructor(config: IAuthConfig) {
     this.config = config;
 
     this.userModel = User;
     this.deviceModel = Device;
+    this.tokenModel = RefreshToken;
   }
 
   /**
@@ -131,8 +133,6 @@ export class AuthService {
   private async getCredentials(user: IUserDocument, client: IClientInfo) {
     let device: IDeviceDocument;
 
-    const token = uid(256);
-
     if (client.id) {
       device = await this.deviceModel.findById(client.id);
 
@@ -141,23 +141,22 @@ export class AuthService {
 
       if (device.hosts[device.hosts.length - 1].address !== client.host)
         device.hosts.push({ address: client.host });
-
-      device.tokens.push({ token });
     } else {
       device = new this.deviceModel({
-        user: user.id,
         agents: [client.agent],
         hosts: [{ address: client.host }],
-        tokens: [{ token }],
       });
     }
 
+    const token = new this.tokenModel({ user: user.id, device: device.id });
+
     await device.save();
+    await token.save();
 
     return {
-      clientID: device.id,
+      clientId: device.id,
       accessToken: await this.signToken(user),
-      refreshToken: token,
+      refreshToken: token.key,
     };
   }
 
