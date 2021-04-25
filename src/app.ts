@@ -8,9 +8,10 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import expressJwt from "express-jwt";
 
-import User from "./models/user";
 import * as routes from "./routes";
 import { authErrors, clientInfo } from "./middleware";
+
+import User from "./models/user";
 
 import * as settings from "./settings";
 
