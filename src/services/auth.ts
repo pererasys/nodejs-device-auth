@@ -204,12 +204,12 @@ export class AuthService {
   async refresh(token: string, client: IClientInfo) {
     try {
       const session = await this.sessionModel
-        .findOne({ device: client.id, token })
+        .findOne({ device: client.id, token, revokedAt: { $exists: false } })
         .populate("user");
 
       const error = new ServiceError("Invalid token.", 403);
 
-      if (!session || session.revokedAt) throw error;
+      if (!session) throw error;
 
       let shouldAuthenticate = false;
 
