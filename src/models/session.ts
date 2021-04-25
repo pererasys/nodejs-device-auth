@@ -6,6 +6,9 @@
 import mongoose, { Schema, Model, Document, Types } from "mongoose";
 import { uid } from "rand-token";
 
+import { IDeviceDocument } from "./device";
+import { IUserDocument } from "./user";
+
 export interface IUserAgent {
   raw: string;
   createdAt: Date;
@@ -19,8 +22,8 @@ export interface IIPAddress {
 }
 
 export interface ISession {
-  user: Types.ObjectId;
-  device: Types.ObjectId;
+  user: Types.ObjectId | IUserDocument;
+  device: Types.ObjectId | IDeviceDocument;
   agents: Types.Array<IUserAgentDocument>;
   hosts: Types.Array<IIPAddressDocument>;
   token: string;
