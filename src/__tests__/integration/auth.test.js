@@ -39,6 +39,7 @@ describe("login", () => {
     const res = await request(app)
       .post("/auth/login")
       .set("Content-Type", "application/json")
+      .set("User-Agent", mockClientInfo.agent)
       .send(mockUser);
 
     expect(res.statusCode).toEqual(200);
@@ -53,6 +54,7 @@ describe("login", () => {
     const res = await request(app)
       .post("/auth/login")
       .set("Content-Type", "application/json")
+      .set("User-Agent", mockClientInfo.agent)
       .send(body);
 
     expect(res.statusCode).toEqual(400);
@@ -71,6 +73,7 @@ describe("register", () => {
     const res = await request(app)
       .post("/auth/register")
       .set("Content-Type", "application/json")
+      .set("User-Agent", mockClientInfo.agent)
       .send(body);
 
     expect(res.statusCode).toEqual(201);

@@ -111,11 +111,11 @@ describe("getCredentials", () => {
   it("should retreive credentials", async () => {
     const result = await service.getCredentials(user, mockClientInfo);
 
-    expect(result).toHaveProperty("clientID");
+    expect(result).toHaveProperty("clientId");
     expect(result).toHaveProperty("accessToken");
     expect(result).toHaveProperty("refreshToken");
 
-    expect(typeof result.clientID).toEqual("string");
+    expect(typeof result.clientId).toEqual("string");
     expect(typeof result.accessToken).toEqual("string");
     expect(typeof result.refreshToken).toEqual("string");
   });
@@ -124,10 +124,10 @@ describe("getCredentials", () => {
 test("register - should register a new user", async () => {
   const result = await service.register(mockUserInput, mockClientInfo);
 
-  expect(result).toHaveProperty("clientID");
+  expect(result).toHaveProperty("clientId");
   expect(result).toHaveProperty("accessToken");
   expect(result).toHaveProperty("refreshToken");
-  expect(typeof result.clientID).toEqual("string");
+  expect(typeof result.clientId).toEqual("string");
   expect(typeof result.accessToken).toEqual("string");
   expect(typeof result.refreshToken).toEqual("string");
 });
@@ -150,10 +150,10 @@ describe("login", () => {
 
     const result = await service.login(mockUserInput, mockClientInfo);
 
-    expect(result).toHaveProperty("clientID");
+    expect(result).toHaveProperty("clientId");
     expect(result).toHaveProperty("accessToken");
     expect(result).toHaveProperty("refreshToken");
-    expect(typeof result.clientID).toEqual("string");
+    expect(typeof result.clientId).toEqual("string");
     expect(typeof result.accessToken).toEqual("string");
     expect(typeof result.refreshToken).toEqual("string");
   });

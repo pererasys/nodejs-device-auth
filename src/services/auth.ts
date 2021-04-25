@@ -5,12 +5,11 @@
 
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { uid } from "rand-token";
-
 import { Model } from "mongoose";
 
 import User, { IUserDocument, IUserInput } from "../models/user";
 import Device, { IDeviceDocument } from "../models/device";
+import Session, { ISessionDocument } from "../models/session";
 
 import { UserService } from "./users";
 
@@ -44,12 +43,14 @@ export class AuthService {
 
   deviceModel: Model<IDeviceDocument>;
   userModel: Model<IUserDocument>;
+  sessionModel: Model<ISessionDocument>;
 
   constructor(config: IAuthConfig) {
     this.config = config;
 
     this.userModel = User;
     this.deviceModel = Device;
+    this.sessionModel = Session;
   }
 
   /**
@@ -67,7 +68,7 @@ export class AuthService {
    * @param {IUserDocument} user
    * @param {IDeviceDocument} device
    */
-  protected signToken = (user: IUserDocument) =>
+  private signToken = (user: IUserDocument) =>
     new Promise<string>((resolve, reject) => {
       jwt.sign(
         {
@@ -132,33 +133,23 @@ export class AuthService {
   private async getCredentials(user: IUserDocument, client: IClientInfo) {
     let device: IDeviceDocument;
 
-    const token = uid(256);
+    if (client.id) device = await this.deviceModel.findById(client.id);
+    else device = new this.deviceModel();
 
-    if (client.id) {
-      device = await this.deviceModel.findById(client.id);
-
-      if (device.agents[device.agents.length - 1] !== client.agent)
-        device.agents.push(client.agent);
-
-      if (device.hosts[device.hosts.length - 1].address !== client.host)
-        device.hosts.push({ address: client.host });
-
-      device.tokens.push({ token });
-    } else {
-      device = new this.deviceModel({
-        user: user.id,
-        agents: [client.agent],
-        hosts: [{ address: client.host }],
-        tokens: [{ token }],
-      });
-    }
+    const session = new this.sessionModel({
+      user: user.id,
+      device: device.id,
+      agents: [{ raw: client.agent }],
+      hosts: [{ address: client.host }],
+    });
 
     await device.save();
+    await session.save();
 
     return {
-      clientID: device.id,
+      clientId: device.id,
       accessToken: await this.signToken(user),
-      refreshToken: token,
+      refreshToken: session.token,
     };
   }
 
@@ -212,52 +203,41 @@ export class AuthService {
    */
   async refresh(token: string, client: IClientInfo) {
     try {
-      const device = await this.deviceModel
-        .findById(client.id)
+      const session = await this.sessionModel
+        .findOne({ device: client.id, token })
         .populate("user");
-
-      const tokens = device.tokens.filter((t) => t.token === token);
 
       const error = new ServiceError("Invalid token.", 403);
 
-      if (tokens.length === 0) throw error;
+      if (!session || session.revokedAt) throw error;
 
       let shouldAuthenticate = false;
 
-      tokens.some(async (t) => {
-        if (typeof t.revokedAt === "undefined") {
-          if (t.expiresAt < new Date()) {
-            t.revokedAt = new Date();
-            t.revokedReason = "expired";
-            await device.save();
+      if (session.expiresAt < new Date()) {
+        session.revokedAt = new Date();
+        session.revokedReason = "expired";
+        await session.save();
 
-            error.message = "Token expired.";
+        error.message = "Token expired.";
+      } else {
+        shouldAuthenticate = true;
 
-            return false;
-          } else {
-            shouldAuthenticate = true;
+        const newExp = new Date();
+        newExp.setDate(newExp.getDate() + 30);
 
-            const newExp = new Date();
-            newExp.setDate(newExp.getDate() + 30);
+        session.expiresAt = newExp;
 
-            t.expiresAt = newExp;
+        if (session.hosts[session.hosts.length - 1].address !== client.host)
+          session.hosts.push({ address: client.host });
 
-            if (device.hosts[device.hosts.length - 1].address !== client.host)
-              device.hosts.push({ address: client.host });
+        if (session.agents[session.agents.length - 1].raw !== client.agent)
+          session.agents.push(client.agent);
 
-            if (device.agents[device.agents.length - 1] !== client.agent)
-              device.agents.push(client.agent);
-
-            await device.save();
-
-            return true;
-          }
-        }
-        return false;
-      });
+        await session.save();
+      }
 
       if (shouldAuthenticate)
-        return await this.signToken(device.user as IUserDocument);
+        return await this.signToken(session.user as IUserDocument);
       else throw error;
     } catch (e) {
       if (e instanceof ServiceError) throw e;
@@ -267,22 +247,26 @@ export class AuthService {
 
   /**
    * Logs out a user
+   * @param {string} user
    * @param {IClientInfo} client
    */
-  async logout(client: IClientInfo) {
+  async logout(user: string, client: IClientInfo) {
     try {
-      const device = await this.deviceModel.findById(client.id);
-
-      const activeTokens = device.tokens.filter(
-        (t) => typeof t.revokedAt === "undefined"
-      );
-
-      activeTokens.forEach((t) => {
-        t.revokedAt = new Date();
-        t.revokedReason = "logout";
+      const sessions = await this.sessionModel.find({
+        device: client.id,
+        user,
       });
 
-      await device.save();
+      const activeSessions = sessions.filter(
+        (s) => typeof s.revokedAt === "undefined"
+      );
+
+      activeSessions.forEach(async (s) => {
+        s.revokedAt = new Date();
+        s.revokedReason = "logout";
+
+        await s.save();
+      });
 
       return "Successfully logged out.";
     } catch (e) {

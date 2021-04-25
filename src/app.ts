@@ -8,13 +8,13 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import expressJwt from "express-jwt";
 
-import User from "./models/user";
-import { ServiceError } from "./services";
-
 import * as routes from "./routes";
 import { authErrors, clientInfo } from "./middleware";
 
 import * as settings from "./settings";
+
+import User from "./models/user";
+import { ServiceError } from "./services";
 
 export const buildApp = () => {
   const app = express();
