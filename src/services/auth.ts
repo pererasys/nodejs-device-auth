@@ -146,8 +146,6 @@ export class AuthService {
     await device.save();
     await session.save();
 
-    console.log(device, session);
-
     return {
       clientId: device.id,
       accessToken: await this.signToken(user),
