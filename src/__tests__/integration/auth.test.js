@@ -35,6 +35,7 @@ describe("login", () => {
     const res = await request(app)
       .post("/auth/login")
       .set("Content-Type", "application/json")
+      .set("User-Agent", mockClientInfo.agent)
       .send(mockUser);
 
     expect(res.statusCode).toEqual(200);
@@ -49,6 +50,7 @@ describe("login", () => {
     const res = await request(app)
       .post("/auth/login")
       .set("Content-Type", "application/json")
+      .set("User-Agent", mockClientInfo.agent)
       .send(body);
 
     expect(res.statusCode).toEqual(400);
@@ -67,6 +69,7 @@ describe("register", () => {
     const res = await request(app)
       .post("/auth/register")
       .set("Content-Type", "application/json")
+      .set("User-Agent", mockClientInfo.agent)
       .send(body);
 
     expect(res.statusCode).toEqual(201);
@@ -76,4 +79,11 @@ describe("register", () => {
 const mockUser = {
   username: "test_user",
   password: "ab12cd34",
+};
+
+const mockClientInfo = {
+  id: undefined,
+  agent:
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+  host: "127.0.0.1",
 };
