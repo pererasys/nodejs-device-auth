@@ -15,7 +15,15 @@ export const register = async (req: IRequest, res: Response) => {
   try {
     const service = new AuthService(settings.AUTH);
 
-    const result = await service.register(req.body, req.client);
+    const { session, ...result } = await service.register(req.body, req.client);
+
+    res.cookie(settings.AUTH.refreshCookie, session.token, {
+      expires: session.expiresAt,
+      httpOnly: true,
+      path: "/",
+      signed: true,
+      secure: settings.HTTPS_ONLY,
+    });
 
     return res.status(201).json(result);
   } catch (e) {
@@ -28,7 +36,15 @@ export const login = async (req: IRequest, res: Response) => {
   try {
     const service = new AuthService(settings.AUTH);
 
-    const result = await service.login(req.body, req.client);
+    const { session, ...result } = await service.login(req.body, req.client);
+
+    res.cookie(settings.AUTH.refreshCookie, session.token, {
+      expires: session.expiresAt,
+      httpOnly: true,
+      path: "/",
+      signed: true,
+      secure: settings.HTTPS_ONLY,
+    });
 
     return res.status(200).json(result);
   } catch (e) {
