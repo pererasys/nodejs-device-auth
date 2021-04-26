@@ -6,9 +6,7 @@ const {
   terminateDatabase,
 } = require("../__utils");
 
-const { buildApp } = require("../../app");
-
-const app = buildApp();
+const { default: app } = require("../../app");
 
 beforeAll(async () => await buildDatabase());
 

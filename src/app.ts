@@ -17,42 +17,40 @@ import * as settings from "./settings";
 import User from "./models/user";
 import { ServiceError } from "./services";
 
-export const buildApp = () => {
-  const app = express();
+const app = express();
 
-  app.use(helmet());
+app.use(helmet());
 
-  app.use(bodyParser.json());
+app.use(bodyParser.json());
 
-  app.use(cookieParser(settings.COOKIE_SECRET));
+app.use(cookieParser(settings.COOKIE_SECRET));
 
-  app.use(clientInfo);
+app.use(clientInfo);
 
-  app.use(
-    expressJwt({
-      secret: settings.AUTH.jwtKey,
-      issuer: settings.AUTH.jwtIssuer,
-      audience: settings.AUTH.jwtAudience,
-      algorithms: ["HS256"],
-      credentialsRequired: false,
-    })
-  );
+app.use(
+  expressJwt({
+    secret: settings.AUTH.jwtKey,
+    issuer: settings.AUTH.jwtIssuer,
+    audience: settings.AUTH.jwtAudience,
+    algorithms: ["HS256"],
+    credentialsRequired: false,
+  })
+);
 
-  app.use(authErrors);
+app.use(authErrors);
 
-  app.use("/auth", routes.auth());
+app.use("/auth", routes.auth());
 
-  app.use("/users", routes.users());
+app.use("/users", routes.users());
 
-  app.get("/health", async (req, res) => {
-    try {
-      const count = await User.countDocuments();
+app.get("/health", async (req, res) => {
+  try {
+    const count = await User.countDocuments();
 
-      return res.status(200).json({ count });
-    } catch {
-      return res.status(500).json(new ServiceError());
-    }
-  });
+    return res.status(200).json({ count });
+  } catch {
+    return res.status(500).json(new ServiceError());
+  }
+});
 
-  return app;
-};
+export default app;

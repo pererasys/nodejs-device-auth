@@ -5,12 +5,11 @@
 
 import mongoose from "mongoose";
 
-import { buildApp } from "./app";
+import app from "./app";
+
 import { DATABASE, PORT } from "./settings";
 
-// Build and start the Express application
-const app = buildApp();
-
+// Start the Express application
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Server started at http://localhost:${PORT}`);
