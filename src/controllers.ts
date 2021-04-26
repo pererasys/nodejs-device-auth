@@ -58,7 +58,7 @@ export const refresh = async (req: IRequest, res: Response) => {
     const service = new AuthService(settings.AUTH);
 
     const { session, ...result } = await service.refresh(
-      req.query[settings.AUTH.refreshCookie] as string,
+      req.signedCookies[settings.AUTH.refreshCookie],
       req.client
     );
 

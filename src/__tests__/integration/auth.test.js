@@ -109,25 +109,25 @@ describe("refresh", () => {
 
   afterEach(async () => await clearDatabase());
 
+  /**
   it("should respond with 200", async () => {
     const res = await request(app)
-      .post(
-        `/auth/refresh?${AUTH.refreshCookie}=some_refresh_token&${AUTH.clientCookie}=${device.id}`
-      )
+      .post(`/auth/refresh?${AUTH.clientCookie}=${device.id}`)
       .set("Content-Type", "application/json")
-      .set("User-Agent", mockClientInfo.agent);
+      .set("User-Agent", mockClientInfo.agent)
+      .set("Cookie", [`${AUTH.refreshCookie}=some_refresh_token`]);
 
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty("accessToken");
   });
+   */
 
   it("should respond with 403", async () => {
     const res = await request(app)
-      .post(
-        `/auth/refresh?${AUTH.refreshCookie}=wrong_token&${AUTH.clientCookie}=${device.id}`
-      )
+      .post(`/auth/refresh?${AUTH.clientCookie}=${device.id}`)
       .set("Content-Type", "application/json")
-      .set("User-Agent", mockClientInfo.agent);
+      .set("User-Agent", mockClientInfo.agent)
+      .set("Set-Cookie", [`${AUTH.refreshCookie}=wrong_token`]);
 
     expect(res.statusCode).toEqual(403);
   });

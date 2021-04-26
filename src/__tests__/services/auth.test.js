@@ -199,7 +199,14 @@ describe("refresh", () => {
       id: device.id,
     });
 
-    expect(typeof result).toEqual("string");
+    expect(result).toHaveProperty("clientId");
+    expect(result).toHaveProperty("accessToken");
+    expect(result).toHaveProperty("session");
+
+    expect(typeof result.clientId).toEqual("string");
+    expect(typeof result.accessToken).toEqual("string");
+    expect(typeof result.session.token).toEqual("string");
+    expect(result.session.expiresAt instanceof Date).toEqual(true);
   });
 });
 

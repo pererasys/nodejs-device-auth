@@ -243,7 +243,7 @@ export class AuthService {
 
       if (shouldAuthenticate)
         return {
-          clientId: session.device,
+          clientId: session.device.toString(),
           accessToken: await this.signToken(session.user as IUserDocument),
           session: {
             token: session.token,
