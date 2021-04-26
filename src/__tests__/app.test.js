@@ -1,8 +1,6 @@
 const request = require("supertest");
 
-const { buildApp } = require("../app");
-
-const app = buildApp();
+const { default: app } = require("../app");
 
 beforeAll(() => {});
 
