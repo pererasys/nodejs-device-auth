@@ -4,7 +4,6 @@
  */
 
 import express from "express";
-import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import expressJwt from "express-jwt";
 
@@ -19,8 +18,6 @@ import * as settings from "./settings";
 const app = express();
 
 app.use(bodyParser.json());
-
-app.use(cookieParser(settings.COOKIE_SECRET));
 
 app.use(clientInfo);
 
