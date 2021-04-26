@@ -14,34 +14,32 @@ import { authErrors, clientInfo } from "./middleware";
 
 import * as settings from "./settings";
 
-export const buildApp = () => {
-  const app = express();
+const app = express();
 
-  app.use(bodyParser.json());
+app.use(bodyParser.json());
 
-  app.use(cookieParser(settings.COOKIE_SECRET));
+app.use(cookieParser(settings.COOKIE_SECRET));
 
-  app.use(clientInfo);
+app.use(clientInfo);
 
-  app.use(
-    expressJwt({
-      secret: settings.AUTH.jwtKey,
-      issuer: settings.AUTH.jwtIssuer,
-      audience: settings.AUTH.jwtAudience,
-      algorithms: ["HS256"],
-      credentialsRequired: false,
-    })
-  );
+app.use(
+  expressJwt({
+    secret: settings.AUTH.jwtKey,
+    issuer: settings.AUTH.jwtIssuer,
+    audience: settings.AUTH.jwtAudience,
+    algorithms: ["HS256"],
+    credentialsRequired: false,
+  })
+);
 
-  app.use(authErrors);
+app.use(authErrors);
 
-  app.use("/auth", routes.auth());
+app.use("/auth", routes.auth());
 
-  app.get("/health", async (req, res) => {
-    const count = await User.countDocuments();
+app.get("/health", async (req, res) => {
+  const count = await User.countDocuments();
 
-    return res.status(200).send({ count });
-  });
+  return res.status(200).send({ count });
+});
 
-  return app;
-};
+export default app;

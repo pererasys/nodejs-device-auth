@@ -7,11 +7,9 @@ const {
   terminateDatabase,
 } = require("../__utils");
 
-const { buildApp } = require("../../app");
+const { default: app } = require("../../app");
 
 const { default: User } = require("../../models/user");
-
-const app = buildApp();
 
 beforeAll(async () => await buildDatabase());
 
