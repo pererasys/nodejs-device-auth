@@ -54,19 +54,18 @@ export class AuthService {
   }
 
   /**
-   * Returns a default login error response
+   * Throws a default authentication exception
    */
   private throwDefaultAuthenticationError() {
     throw new ValidationError(
       "We couldn't log you in with the provided credentials",
-      ["identifier", "password"]
+      ["username", "password"]
     );
   }
 
   /**
-   * Signs a JWT for the provided user
+   * Signs and returns a JWT for the provided user
    * @param {IUserDocument} user
-   * @param {IDeviceDocument} device
    */
   private signToken = (user: IUserDocument) =>
     new Promise<string>((resolve, reject) => {
@@ -89,7 +88,7 @@ export class AuthService {
     });
 
   /**
-   * Validates the provided passwords and
+   * Validates the passwords and
    * returns the hashed result
    * @param {string} password
    * @param {string} confirmPassword
@@ -110,7 +109,8 @@ export class AuthService {
   }
 
   /**
-   * Authenticates a user and returns a signed JWT
+   * Compares the provided password to the hash stored
+   * in the database, and returns new credentials
    * @param {IUserDocument} user
    * @param {string} password
    * @param {IClientInfo} client
@@ -126,7 +126,8 @@ export class AuthService {
   }
 
   /**
-   * Retrieve credentials and update the device auth status
+   * Create a new device (if needed) and authentication session,
+   * and returns new credentials
    * @param {IUserDocument} user
    * @param {IClientInfo} client
    */
@@ -154,7 +155,7 @@ export class AuthService {
   }
 
   /**
-   * Creates a new user and returns a signed JWT + refresh token
+   * Creates a new user and returns new credentials
    * @param {IRegistrationInput} data
    * @param {IClientInfo} client
    */
@@ -179,7 +180,7 @@ export class AuthService {
   }
 
   /**
-   * Logs a user in and returns their credentials
+   * Logs a user in and returns new credentials
    * @param {IUserInput} data
    * @param {IClientInfo} client
    */
@@ -189,10 +190,11 @@ export class AuthService {
 
       const user = await this.userModel.findOne({ username });
 
-      return await this.authenticate(user, password, client);
+      if (user) return await this.authenticate(user, password, client);
+      else this.throwDefaultAuthenticationError();
     } catch (e) {
       if (e instanceof ServiceError) throw e;
-      else this.throwDefaultAuthenticationError();
+      else throw new ServiceError();
     }
   }
 

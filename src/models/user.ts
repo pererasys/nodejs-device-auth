@@ -25,13 +25,13 @@ const UserSchema = new Schema(
   {
     username: {
       type: String,
-      required: true,
+      required: [true, "A username is required."],
       index: true,
       unique: true,
     },
     password: {
       type: String,
-      required: true,
+      required: [true, "A password is required."],
     },
   },
   { timestamps: true, collection: "users" }
