@@ -15,7 +15,7 @@ afterEach(async () => await clearDatabase());
 afterAll(async () => await terminateDatabase());
 
 test("should have healthy 200 status", async () => {
-  const res = await request(app).get("/health");
+  const res = await request(app).get("/sessions");
 
   expect(res.statusCode).toEqual(200);
 });
