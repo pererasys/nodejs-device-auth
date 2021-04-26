@@ -19,7 +19,7 @@ export const buildApp = () => {
 
   app.use(bodyParser.json());
 
-  app.use(cookieParser(process.env.COOKIE_SECRET || "some_secret_key"));
+  app.use(cookieParser(settings.COOKIE_SECRET));
 
   app.use(clientInfo);
 
