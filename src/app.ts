@@ -5,12 +5,10 @@
 
 import express from "express";
 
-export const buildApp = () => {
-  const app = express();
+const app = express();
 
-  app.get("/", async (req, res) => {
-    return res.status(200).send("Hello world!");
-  });
+app.get("/", async (req, res) => {
+  return res.status(200).send("Hello world!");
+});
 
-  return app;
-};
+export default app;
