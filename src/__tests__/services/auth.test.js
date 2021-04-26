@@ -108,11 +108,12 @@ describe("getCredentials", () => {
 
     expect(result).toHaveProperty("clientId");
     expect(result).toHaveProperty("accessToken");
-    expect(result).toHaveProperty("refreshToken");
+    expect(result).toHaveProperty("session");
 
     expect(typeof result.clientId).toEqual("string");
     expect(typeof result.accessToken).toEqual("string");
-    expect(typeof result.refreshToken).toEqual("string");
+    expect(typeof result.session.token).toEqual("string");
+    expect(result.session.expiresAt instanceof Date).toEqual(true);
   });
 });
 
@@ -121,10 +122,12 @@ test("register - should register a new user", async () => {
 
   expect(result).toHaveProperty("clientId");
   expect(result).toHaveProperty("accessToken");
-  expect(result).toHaveProperty("refreshToken");
+  expect(result).toHaveProperty("session");
+
   expect(typeof result.clientId).toEqual("string");
   expect(typeof result.accessToken).toEqual("string");
-  expect(typeof result.refreshToken).toEqual("string");
+  expect(typeof result.session.token).toEqual("string");
+  expect(result.session.expiresAt instanceof Date).toEqual(true);
 });
 
 describe("login", () => {
@@ -149,10 +152,12 @@ describe("login", () => {
 
     expect(result).toHaveProperty("clientId");
     expect(result).toHaveProperty("accessToken");
-    expect(result).toHaveProperty("refreshToken");
+    expect(result).toHaveProperty("session");
+
     expect(typeof result.clientId).toEqual("string");
     expect(typeof result.accessToken).toEqual("string");
-    expect(typeof result.refreshToken).toEqual("string");
+    expect(typeof result.session.token).toEqual("string");
+    expect(result.session.expiresAt instanceof Date).toEqual(true);
   });
 });
 
