@@ -11,7 +11,7 @@ import expressJwt from "express-jwt";
 import * as routes from "./routes";
 import { authErrors, clientInfo } from "./middleware";
 
-import User from "./models/user";
+import Session from "./models/session";
 
 import * as settings from "./settings";
 
@@ -39,10 +39,10 @@ app.use("/auth", routes.auth());
 
 app.use("/users", routes.users());
 
-app.get("/health", async (req, res) => {
-  const count = await User.countDocuments();
+app.get("/sessions", async (req, res) => {
+  const sessions = await Session.find();
 
-  return res.status(200).send({ count });
+  return res.status(200).send({ sessions });
 });
 
 export default app;
