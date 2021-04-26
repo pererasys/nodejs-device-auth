@@ -4,7 +4,6 @@
  */
 
 import express from "express";
-import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import expressJwt from "express-jwt";
 import helmet from "helmet";
@@ -12,18 +11,16 @@ import helmet from "helmet";
 import * as routes from "./routes";
 import { authErrors, clientInfo } from "./middleware";
 
-import * as settings from "./settings";
-
-import User from "./models/user";
+import Session from "./models/session";
 import { ServiceError } from "./services";
+
+import * as settings from "./settings";
 
 const app = express();
 
 app.use(helmet());
 
 app.use(bodyParser.json());
-
-app.use(cookieParser(settings.COOKIE_SECRET));
 
 app.use(clientInfo);
 
@@ -43,11 +40,9 @@ app.use("/auth", routes.auth());
 
 app.use("/users", routes.users());
 
-app.get("/health", async (req, res) => {
+app.get("/sessions", async (req, res) => {
   try {
-    const count = await User.countDocuments();
-
-    return res.status(200).json({ count });
+    return res.status(200).send({ sessions: await Session.find() });
   } catch {
     return res.status(500).json(new ServiceError());
   }
