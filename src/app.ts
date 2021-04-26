@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import expressJwt from "express-jwt";
 
-import User from "./models/user";
+import Session from "./models/session";
 import * as routes from "./routes";
 import { authErrors, clientInfo } from "./middleware";
 
@@ -36,10 +36,10 @@ app.use(authErrors);
 
 app.use("/auth", routes.auth());
 
-app.get("/health", async (req, res) => {
-  const count = await User.countDocuments();
+app.get("/sessions", async (req, res) => {
+  const sessions = await Session.find();
 
-  return res.status(200).send({ count });
+  return res.status(200).send({ sessions });
 });
 
 export default app;
