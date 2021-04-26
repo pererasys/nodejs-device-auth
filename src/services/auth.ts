@@ -242,7 +242,14 @@ export class AuthService {
       }
 
       if (shouldAuthenticate)
-        return await this.signToken(session.user as IUserDocument);
+        return {
+          clientId: session.device,
+          accessToken: await this.signToken(session.user as IUserDocument),
+          session: {
+            token: session.token,
+            expiresAt: session.expiresAt,
+          },
+        };
       else throw error;
     } catch (e) {
       if (e instanceof ServiceError) throw e;

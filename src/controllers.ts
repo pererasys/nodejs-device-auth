@@ -57,12 +57,20 @@ export const refresh = async (req: IRequest, res: Response) => {
   try {
     const service = new AuthService(settings.AUTH);
 
-    const accessToken = await service.refresh(
+    const { session, ...result } = await service.refresh(
       req.query[settings.AUTH.refreshCookie] as string,
       req.client
     );
 
-    return res.status(200).json({ accessToken });
+    res.cookie(settings.AUTH.refreshCookie, session.token, {
+      expires: session.expiresAt,
+      httpOnly: true,
+      path: "/",
+      signed: true,
+      secure: settings.HTTPS_ONLY,
+    });
+
+    return res.status(200).json(result);
   } catch (e) {
     if (e instanceof ServiceError) return res.status(e.status).json(e);
     return res.status(500).json(new ServiceError());

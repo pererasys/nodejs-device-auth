@@ -5,6 +5,7 @@
 
 import express from "express";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import expressJwt from "express-jwt";
 import helmet from "helmet";
 
@@ -21,6 +22,8 @@ const app = express();
 app.use(helmet());
 
 app.use(bodyParser.json());
+
+app.use(cookieParser(settings.COOKIE_SECRET));
 
 app.use(clientInfo);
 
