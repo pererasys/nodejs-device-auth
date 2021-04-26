@@ -153,7 +153,10 @@ export class AuthService {
     return {
       clientId: device.id,
       accessToken: await this.signToken(user),
-      refreshToken: session.token,
+      session: {
+        token: session.token,
+        expiresAt: session.expiresAt,
+      },
     };
   }
 
