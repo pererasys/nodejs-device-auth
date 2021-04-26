@@ -4,21 +4,20 @@
  */
 
 import express from "express";
-import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import expressJwt from "express-jwt";
 
-import Session from "./models/session";
 import * as routes from "./routes";
 import { authErrors, clientInfo } from "./middleware";
+
+import Session from "./models/session";
+import { ServiceError } from "./services";
 
 import * as settings from "./settings";
 
 const app = express();
 
 app.use(bodyParser.json());
-
-app.use(cookieParser(settings.COOKIE_SECRET));
 
 app.use(clientInfo);
 
@@ -37,9 +36,11 @@ app.use(authErrors);
 app.use("/auth", routes.auth());
 
 app.get("/sessions", async (req, res) => {
-  const sessions = await Session.find();
-
-  return res.status(200).send({ sessions });
+  try {
+    return res.status(200).send({ sessions: await Session.find() });
+  } catch {
+    return res.status(500).json(new ServiceError());
+  }
 });
 
 export default app;
